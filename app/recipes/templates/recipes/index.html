@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>DSCI641 Recipe Recommender</title>
+	</head>
+	<body>
+		{% if latest_recipe_list %}
+    <ul>
+    {% for recipe in latest_recipe_list %}
+        <li><a href="/recipes/{{ recipe.id }}/">{{ recipe.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No recipes are available.</p>
+{% endif %}
+	</body>
+</html>
