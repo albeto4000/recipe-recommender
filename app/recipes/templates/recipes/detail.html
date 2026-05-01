@@ -1,23 +1,43 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title></title>
+		<title>{{recipe.name|title}} Recipe</title>
+		<script src="https://kit.fontawesome.com/4b01eb49dd.js" crossorigin="anonymous"></script>
+		{% load range_filter %}
+		{% load negate %}
 	</head>
 	<body>
-		<h1>{{ recipe.name }}</h1>
-			<div>{{ recipe.description }}</div>
+		<h1>{{ recipe.name|title }}</h1>
+			<div>{{ recipe.description|capfirst }}</div>
 			<h2>Ingredients</h2>
 			<ul>
 				{% for ingredient in ingredients %}
-				<li>{{ ingredient }}</li>
-
+				<li>{{ ingredient|title }}</li>
 				{% endfor %}
 			</ul>
 			<h2>Steps</h2>
 			<ol>
 				{% for step in steps %}
-				<li>{{ step }}</li>
+				<li>{{ step|capfirst }}</li>
 				{% endfor %}
 			</ol>
+			<h2>Ratings</h2>
+				{% if recipe.rating_set is not None %}
+					{% for rating in recipe.rating_set.all %}
+					<div>
+						{% for i in rating.rating|times %}
+							<i class="fa-solid fa-star"></i>
+						{% endfor %}
+						{% for i in rating.rating|negate|add:"5"|times %}
+							<i class="fa-regular fa-star"></i>
+						{% endfor %}
+						<div>{{ rating.review }}</div>
+						<br />
+					</div>
+					{% empty %}
+					<div>This recipe has not been rated.</div>
+					{% endfor %}
+				
+			{% endif %}	
 	</body>
 </html>
