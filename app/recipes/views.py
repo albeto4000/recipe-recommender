@@ -7,7 +7,7 @@ import re
 import pandas as pd
 
 from .models import Recipe, Rating
-    
+
 		
 def index(request):
  recipe_list = Recipe.objects.order_by("id")
