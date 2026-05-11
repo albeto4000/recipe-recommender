@@ -2,10 +2,12 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 import pandas as pd
 from pathlib import Path
+from django.contrib.auth.hashers import make_password
+import re
 
 from recipes.models import Recipe
 from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password
+
 
 APP_DIR = Path(settings.BASE_DIR).resolve().parent
 
@@ -44,7 +46,7 @@ class Command(BaseCommand):
 				minutes = row['TotalTime'],
 				date_published = pd.to_datetime(row['DatePublished'], format = 'mixed'),
 				description = row['Description'],
-				images = row['Images'],
+				images = re.sub(r'(c\()|\)|"', '', row['Images']).split(', ')[0],
 				category = row['RecipeCategory'],
 				keywords = row['Keywords'],
 				ingredient_quantities = row['RecipeIngredientQuantities'],

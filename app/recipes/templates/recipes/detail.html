@@ -1,23 +1,23 @@
+{% load range_filter %}
+
 <!DOCTYPE html>
 <html>
 	<head>
 		<title>{{recipe.name|title}} Recipe</title>
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 		<script src="https://kit.fontawesome.com/4b01eb49dd.js" crossorigin="anonymous"></script>
-		{% load range_filter %}
-		{% load negate %}
 	</head>
 	<body>
 		<div class="container">
-			<h1>{{ recipe.name|title }}</h1>
+			<h1>{{ recipe.name|title|safe }}</h1>
 			<hr />
 			<h5>Submitted by {{ recipe.contributor|title }}</h5>
-			<div>"{{ recipe.description|capfirst }}"</div>
+			<div class="fst-italic">"{{ recipe.description|capfirst|safe }}"</div>
 			<br />
 				{% if recipe.images != "character(0" %}
 				<img src={{ recipe.images }} />
 				{% else %}
-				<div>No image</div>
+													<img src = 'https://upload.wikimedia.org/wikipedia/en/3/34/Food-com-logo.png' />
 				{% endif %}
 				<div>Ready in {{ minutes }} minutes</div>
 				<hr />
