@@ -3,31 +3,35 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
+import re
+import pandas as pd
 
 from .models import Recipe, Rating
-
-import ast
-
-
-
-class IndexView(generic.ListView):
-    template_name = "recipes/index.html"
-    context_object_name = "latest_recipe_list"
-
-    def get_queryset(self):
-        """Return the last five published questions."""
-        return Recipe.objects.order_by("-id")[:5]
-
+    
+		
+def index(request):
+ recipe_list = Recipe.objects.order_by("id")
+ 
+ return render(request, 'recipes/index.html', {
+     'latest_recipe_list': recipe_list
+ })
 
 def detail(request, recipe_id):
-    #model = Recipe
-    #template_name = "recipes/detail.html"
-    recipe = get_object_or_404(Recipe, pk = recipe_id)
-    ingredients = list(ast.literal_eval(recipe.ingredients))
-    steps = list(ast.literal_eval(recipe.steps))
+	recipe = get_object_or_404(Recipe, pk = recipe_id)
+	ingredients = re.sub(r'(c\()|\)|"', '', recipe.ingredients).split(', ')
+	ing_amounts = re.sub(r'(c\()|\)|"', '', recipe.ingredient_quantities).split(', ')
+	steps = re.sub(r'(c\()|\)|"', '', recipe.instructions).split(', ')
+     
+	img_url = re.sub(r'(c\()|\)|"', '', recipe.images).split(', ')[0]
+	minutes = re.sub(r'\D', '', recipe.minutes)
 
-    url = 'https://www.food.com/recipe/' + recipe.name.replace(' ', '-') +'-' + str(recipe.id)
-
-    return render(request, 'recipes/detail.html', {'recipe': recipe, 'steps': steps, 'ingredients': ingredients, 'url': url})
-
-    
+	return render(request, 'recipes/detail.html', {
+          'recipe': recipe, 
+          'ingredients': list(zip(ing_amounts, ingredients)), 
+					'steps': steps, 
+					'img_url': img_url,
+					'minutes': minutes
+  })
+	#return render(request, 'recipes/detail.html', {'recipe': recipe, 'steps': steps, 'ingredients': ingredients, 'url': url})
+		
+  

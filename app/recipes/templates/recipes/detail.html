@@ -2,42 +2,42 @@
 <html>
 	<head>
 		<title>{{recipe.name|title}} Recipe</title>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 		<script src="https://kit.fontawesome.com/4b01eb49dd.js" crossorigin="anonymous"></script>
 		{% load range_filter %}
 		{% load negate %}
 	</head>
 	<body>
-		<h1>{{ recipe.name|title }}</h1>
-			<div>{{ recipe.description|capfirst }}</div>
-			<h2>Ingredients</h2>
-			<ul>
-				{% for ingredient in ingredients %}
-				<li>{{ ingredient|title }}</li>
-				{% endfor %}
-			</ul>
-			<h2>Steps</h2>
-			<ol>
-				{% for step in steps %}
-				<li>{{ step|capfirst }}</li>
-				{% endfor %}
-			</ol>
-			<h2>Ratings</h2>
-				{% if recipe.rating_set is not None %}
-					{% for rating in recipe.rating_set.all %}
-					<div>
-						{% for i in rating.rating|times %}
-							<i class="fa-solid fa-star"></i>
-						{% endfor %}
-						{% for i in rating.rating|negate|add:"5"|times %}
-							<i class="fa-regular fa-star"></i>
-						{% endfor %}
-						<div>{{ rating.review }}</div>
-						<br />
-					</div>
-					{% empty %}
-					<div>This recipe has not been rated.</div>
+		<div class="container">
+			<h1>{{ recipe.name|title }}</h1>
+			<hr />
+			<h5>Submitted by {{ recipe.contributor|title }}</h5>
+			<div>"{{ recipe.description|capfirst }}"</div>
+			<br />
+				{% if recipe.images != "character(0" %}
+				<img src={{ recipe.images }} />
+				{% else %}
+				<div>No image</div>
+				{% endif %}
+				<div>Ready in {{ minutes }} minutes</div>
+				<hr />
+				<h2>Ingredients</h2>
+				<ul>
+					{% for quantity, ingredient in ingredients %}
+						{% if quantity != 'NA' %}
+							<li>{{ quantity }} {{ ingredient|title }}</li>
+						{% else %}
+							<li>{{ ingredient|title }}</li>
+						{% endif %}
 					{% endfor %}
-				
-			{% endif %}	
+				</ul>
+				<h2>Steps</h2>
+				<ol>
+					{% for step in steps %}
+					<li>{{ step|capfirst }}</li>
+					{% endfor %}
+				</ol>
+			</div>
+			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 	</body>
 </html>

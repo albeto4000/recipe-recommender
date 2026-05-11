@@ -2,16 +2,34 @@
 <html>
 	<head>
 		<title>DSCI641 Recipe Recommender</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+		<script src="https://kit.fontawesome.com/4b01eb49dd.js" crossorigin="anonymous"></script>
 	</head>
 	<body>
-		{% if latest_recipe_list %}
-    <ul>
-    {% for recipe in latest_recipe_list %}
-        <li><a href="/recipes/{{ recipe.id }}/">{{ recipe.name }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No recipes are available.</p>
-{% endif %}
+		<div class="container">
+			{% if latest_recipe_list %}
+					<div class="row row-cols-1 row-cols-md-5">
+					{% for recipe in latest_recipe_list %}
+					<a href="/recipes/{{ recipe.id }}/" class="text-decoration-none">
+						<div class="col">
+							<div class="card h-100">
+								<img src = '' />
+								<div class="card-body">
+									<h5 class="card-title">{{ recipe.name }}</h5>
+									<p class="card-text">{{ recipe.contributor }}</p>
+								</div>
+							</div>
+						</div>
+						</a>
+							<!-- <li><a href="/recipes/{{ recipe.id }}/">{{ recipe.name }}</a></li> -->
+					{% endfor %}
+					</div>
+			{% else %}
+					<p>No recipes are available.</p>
+			{% endif %}			
+		</div>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 	</body>
 </html>
