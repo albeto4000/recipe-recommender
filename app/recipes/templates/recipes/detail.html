@@ -109,23 +109,36 @@
 	<script>
 		//Uses javascript/jQuery to update the rating stars as the user interacts with them
 		$(document).ready(function(){
+			var is_rated = false;
+			var rating = 0;
+			
 			//On rating star click
 			$(document).on('click', '.rating-star', function(){
+				val = $(this).attr('value');
+
+				if(val == rating){
+					rating = !rating;
+				}
+				else{
+					rating = val;
+				}
+
+
 				$('.rating-star').each(function(){
-					if($(this).attr('value') <= val){
-						//If the star has been clicked (rating submitted), resets the rating
-						if($(this).hasClass('rating-star-active')){
-							$(this).removeClass('rating-star-active');
-							$(this).addClass('fa-regular');
-							$(this).removeClass('fa-solid');
-						}
-						//If the star hasn't been clicked, sets the rating to whichever star was clicked
-						else{
+					if(rating){
+						if($(this).attr('value') <= val){
 							$(this).addClass('rating-star-active');
 							$(this).addClass('fa-solid');
 							$(this).removeClass('fa-regular');
 						}
-
+						else{
+							$(this).removeClass('rating-star-active');
+							$(this).removeClass('fa-solid');
+							$(this).addClass('fa-regular');
+						}
+					}
+					else{
+						$(this).removeClass('rating-star-active');
 					}
 				});
 			});
