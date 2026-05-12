@@ -2,5 +2,9 @@
     height: 150px;
 }
 .card-body{
-    height: 150px
+    height: 150px;
+}
+
+#recipe-img{
+	height: 400px;
 }

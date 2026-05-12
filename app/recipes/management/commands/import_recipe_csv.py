@@ -70,4 +70,3 @@ class Command(BaseCommand):
 
 		Recipe.objects.bulk_create(recipe_instances)
 		self.stdout.write(self.style.SUCCESS('Successfully imported recipe data'))
-		
