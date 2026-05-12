@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
+from django.core.paginator import Paginator
+
 import re
 import pandas as pd
 
@@ -11,9 +13,13 @@ from .models import Recipe, Rating
 		
 def index(request):
  recipe_list = Recipe.objects.order_by("id")
+ paginator = Paginator(recipe_list, 12)
+
+ page_number = request.GET.get('page')
+ page_obj = paginator.get_page(page_number)
  
  return render(request, 'recipes/index.html', {
-     'latest_recipe_list': recipe_list
+     'page_obj': page_obj
  })
 
 def detail(request, recipe_id):
