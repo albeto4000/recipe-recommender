@@ -8,7 +8,9 @@
 		<script src="https://kit.fontawesome.com/4b01eb49dd.js" crossorigin="anonymous"></script>
 	</head>
 	<body>
-		<div class="container">
+		{% include 'recipes/navbar.html' %}
+
+		<div class="container pt-2 pb-4">
 			<h1>{{ recipe.name|title|safe }}</h1>
 			<hr />
 			<h5>Submitted by {{ recipe.contributor|title }}</h5>
@@ -19,7 +21,12 @@
 				{% else %}
 													<img src = 'https://upload.wikimedia.org/wikipedia/en/3/34/Food-com-logo.png' />
 				{% endif %}
-				<div>Ready in {{ minutes }} minutes</div>
+				<div class = "mt-4 mb-2" id="recipe-info">
+					<div class="my-2"><i class="fa-regular fa-clock"></i> Ready in {{ minutes }} minutes</div>
+					<div class="my-2"><i class="fa-solid fa-apple-whole"></i> Ingredients: {{ n_ingredients }}</div>
+					<div class="my-2"><i class="fa-solid fa-bowl-food"></i> Servings: {{ recipe.servings }}</div>
+					<div class="my-2 link-primary" role="button" data-bs-toggle="modal" data-bs-target="#nutrition-modal">Nutrition Information</div>
+				</div>
 				<hr />
 				<h2>Ingredients</h2>
 				<ul>
@@ -38,6 +45,38 @@
 					{% endfor %}
 				</ol>
 			</div>
+
+			<div class="modal fade" id="nutrition-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5" id="staticBackdropLabel">Nutrition Information</h1>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>Nutrient</th>
+										<th>Amount Per Serving</th>
+										<th>% Daily Value</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for label, value, pct_dv in nutrition_info %}
+									<tr>
+										<td>{{ label }}</td>
+										<td>{{ value }}</td>
+										<td>{{ pct_dv|floatformat:3 }}</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 	</body>
 </html>

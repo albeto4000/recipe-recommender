@@ -13,7 +13,7 @@ def index(request):
  recipe_list = Recipe.objects.order_by("id")
  
  return render(request, 'recipes/index.html', {
-     'latest_recipe_list': recipe_list
+     'latest_recipe_list': recipe_list[:20]
  })
 
 def detail(request, recipe_id):
@@ -23,12 +23,18 @@ def detail(request, recipe_id):
 	steps = re.sub(r'(c\()|\)|"', '', recipe.instructions).split(', ')
     
 	minutes = re.sub(r'\D', '', recipe.minutes)
+	nutrition_labels = ['Calories', 'Total Fat', 'Saturated Fat', 'Cholesterol', 'Sodium', 'Total Carbohydrate', 'Dietary Fiber', 'Sugars', 'Protein']
+	nutrition_vals = [recipe.calories, recipe.fat_content, recipe.saturated_fat_content, recipe.cholesterol_content, recipe.sodium_content, recipe.carbohydrates_content, recipe.fiber_content, recipe.sugar_content, recipe.protein_content]
+	nutrition_dv = [2000, 78, 20, 300, 2300, 275, 28, 50, 50]
+	nutrition_pct = [round(val / dv, 2) for val, dv in zip(nutrition_vals, nutrition_dv)]
 
 	return render(request, 'recipes/detail.html', {
           'recipe': recipe, 
           'ingredients': list(zip(ing_amounts, ingredients)), 
+          'n_ingredients': len(ingredients),
 					'steps': steps, 
-					'minutes': minutes
+					'minutes': minutes,
+          'nutrition_info': list(zip(nutrition_labels, nutrition_vals, nutrition_pct))
   })
 	#return render(request, 'recipes/detail.html', {'recipe': recipe, 'steps': steps, 'ingredients': ingredients, 'url': url})
 		

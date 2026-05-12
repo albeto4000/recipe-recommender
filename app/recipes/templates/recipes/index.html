@@ -12,7 +12,9 @@
 		<script src="https://kit.fontawesome.com/4b01eb49dd.js" crossorigin="anonymous"></script>
 	</head>
 	<body>
-		<div class="container">
+		{% include 'recipes/navbar.html' %}
+
+		<div class="container pt-2 pb-4">
 			{% if latest_recipe_list %}
 					<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 h-100">
 					{% for recipe in latest_recipe_list %}
