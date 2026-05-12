@@ -49,25 +49,24 @@
 			{% endif %}
 
 			<!-- Pagination -->
-			<div class="pagination d-flex my-4 justify-content-center">
+			<div class="pagination d-flex my-4 justify-content-center text-center">
 			{% if page_obj.has_previous %}
-				<a href="?page=1"><button class="btn">First</button></a>
-				<a href="?page={{ page_obj.previous_page_number }}"><button class="btn">Previous</button></a>
+				<a href="?page=1"><button class="btn"><i class="fa-solid fa-angles-left"></i></button></a>
+				<a href="?page={{ page_obj.previous_page_number }}"><button class="btn"><i class="fa-solid fa-angle-left"></i></button></a>
 			{% else %}
-				<button class="btn invisible">First</button>
-				<button class="btn invisible">Prevoius</button>
+				<button class="btn invisible"><i class="fa-solid fa-angles-left"></i></button>
+				<button class="btn invisible"><i class="fa-solid fa-angle-left"></i></button>
 			{% endif %}
 
-			<div class="my-auto mx-2">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+			<div class="text-center my-auto mx-2">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
 
 			{% if page_obj.has_next %}
-				<a href="?page={{ page_obj.next_page_number }}"><button class="btn">Next</button></a>
-				<a href="?page={{ page_obj.paginator.num_pages }}"><button class="btn">Last</button></a>
+				<a href="?page={{ page_obj.next_page_number }}"><button class="btn"><i class="fa-solid fa-angle-right"></i></button></a>
+				<a href="?page={{ page_obj.paginator.num_pages }}"><button class="btn"><i class="fa-solid fa-angles-right"></i></button></a>
 			{% else %}
-				<button class="btn invisible">Next</button>
-				<button class="btn invisible">Last</button>
+				<button class="btn invisible"><i class="fa-solid fa-angle-right"></i></button>
+				<button class="btn invisible"><i class="fa-solid fa-angles-right"></i></button>
 			{% endif %}
-
 		</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 	</body>
