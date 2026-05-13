@@ -31,7 +31,7 @@
 					<div class="my-2"><i class="fa-regular fa-clock"></i> Ready in {{ minutes }} minutes</div>
 					<div class="my-2"><i class="fa-solid fa-apple-whole"></i> Ingredients: {{ n_ingredients }}</div>
 					<div class="my-2"><i class="fa-solid fa-bowl-food"></i> Servings: {{ recipe.servings }}</div>
-					<div class="my-2 link-primary" role="button" data-bs-toggle="modal" data-bs-target="#nutrition-modal">Nutrition Information</div>
+					<div class="my-2 link-primary" id="show-nutrition" role="button" data-bs-toggle="modal" data-bs-target="#nutrition-modal">Nutrition Information</div>
 				</div>
 				<hr />
 				<h2>Ingredients</h2>
@@ -50,8 +50,9 @@
 					<li>{{ step|capfirst }}</li>
 					{% endfor %}
 				</ol>
-
+				
 			{% for rating in recipe.rating_set.all %}
+				{% if forloop.counter <= 20 %}
 				<div class="card my-3 py-2">
 					<div class="card-body d-flex flex-column h-auto">
 						<div>
@@ -66,6 +67,7 @@
 						<div class="mt-auto pt-4">{{ rating.user }}</div>
 					</div>
 				</div>
+				{% endif %}
 			{% endfor %}
 		</div>
 		
@@ -106,6 +108,14 @@
 	<script>
 		//Uses javascript/jQuery to update the rating stars as the user interacts with them
 		$(document).ready(function(){
+			$(document).on('click', '#show-nutrition', function(){
+				$('#nutrition-modal').modal('show');
+			});
+
+			$(document).on('click', '.btn-close', function(){
+				$('#nutrition-modal').modal('hide');
+			});
+
 			var is_rated = false;
 			var rating = 0;
 			

@@ -42,19 +42,16 @@ class Command(BaseCommand):
 		)
 
 		#Handles any missing integer values
-		recipe_df.fillna(0);
+		recipe_df.fillna(0, inplace = True);
 
 		ratings_df['DateSubmitted'] = pd.to_datetime(
 				ratings_df['DateSubmitted'],
 				errors='coerce'
 		)
 
-		recipe_sample = recipe_df.drop_duplicates(subset = ['AuthorId']).sample(n = 1000, random_state = 641).fillna(0)
-		ratings_sample = ratings_df[ratings_df['RecipeId'].isin(recipe_sample['RecipeId'])]
-		
 		#Selects all user table columns and drops duplicates
 		recipe_users = (
-				pd.concat([recipe_sample[['AuthorId', 'AuthorName']], ratings_sample[['AuthorId', 'AuthorName']]])
+				pd.concat([recipe_df[['AuthorId', 'AuthorName']], ratings_df[['AuthorId', 'AuthorName']]])
 				.drop_duplicates(subset=['AuthorId'])
 		)
 
@@ -118,7 +115,7 @@ class Command(BaseCommand):
 						recipe_yield=row.RecipeYield,
 						instructions=row.RecipeInstructions,
 				)
-				for row in recipe_sample.itertuples(index=False)
+				for row in recipe_df.itertuples(index=False)
 		]
 
 		Recipe.objects.bulk_create(
@@ -143,7 +140,7 @@ class Command(BaseCommand):
 						review=row.Review,
 						date_submitted=row.DateSubmitted,
 				)
-				for row in ratings_sample.itertuples(index=False)
+				for row in ratings_df.itertuples(index=False)
 		]
 
 		Rating.objects.bulk_create(
