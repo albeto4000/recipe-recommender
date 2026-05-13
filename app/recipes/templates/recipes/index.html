@@ -14,46 +14,45 @@
 	<body>
 		{% include 'recipes/navbar.html' %}
 		<div class="container pt-2 pb-4">
-			{% if page_obj %}
-		<section>
+		{% if recs %}
+			{% for rec in recs %}
+		<section class="py-2">
 			<div class="d-flex align-items-center">
-				<h3 class="me-2 p-2">POPULAR RECIPES</h3>
+				<h3 class="me-2 p-2">{{ rec.category|upper }}</h3>
 				<div class="flex-grow-1 border-bottom border-primary border-5"></div>
 			</div>
 
-			<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-2 h-100">
-			{% for recipe in page_obj %}
+			<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-2">
+			{% for recipe in rec.list %}
 			<a href="/recipes/{{ recipe.id }}/" class="text-decoration-none">
 				<div class = "col">
-					<div class="card recipe-card">
+					<div class="card">
 						{% if recipe.images != "character(0" %}
 							<img class = "card-img-top object-fit-cover" src = {{ recipe.images }} />
 						{% else %}
 							<img class = "card-img-top object-fit-cover" src = 'https://upload.wikimedia.org/wikipedia/en/3/34/Food-com-logo.png' style = "object-fit:cover" />
 						{% endif %}
-						<div class="card-body px-2 d-flex flex-column">
+						<div class="card-body recipe-card px-2 d-flex flex-column">
 							<h5 class="card-title">{{ recipe.name|safe }}</h5>
-								<div class="d-flex mt-auto justify-content-between">
-									{% if recipe.review_count != 0 %}
-									<div><i class="fa-solid fa-star"></i> {{ recipe.aggregated_rating }} ({{ recipe.review_count }})</div>
-									{% else %}
-									<div></div>
-									{% endif %}
-									<div><i class="fa-solid fa-clock"></i> {{ recipe.minutes|recipe_time }}</div>
-								</div>
-							
+							<div class="d-flex mt-auto justify-content-between">
+								{% if recipe.review_count != 0 %}
+								<div><i class="fa-solid fa-star"></i> {{ recipe.aggregated_rating }} ({{ recipe.review_count }})</div>
+								{% else %}
+								<div></div>
+								{% endif %}
+								<div><i class="fa-solid fa-clock"></i> {{ recipe.minutes|recipe_time }}</div>
+							</div>
 						</div>
 					</div>
 				</div>
-				</a>
-					<!-- <li><a href="/recipes/{{ recipe.id }}/">{{ recipe.name }}</a></li> -->
+			</a>
 			{% endfor %}
 			</div>
-			
-			<a href="{% url 'recipes:browse' %}">
-				<button type="button" class="btn btn-outline-primary btn-lg mt-3 px-4 py-2" >See More Popular Recipes</button>
+			<a href={% url rec.url %}>
+				<button type="button" class="btn btn-outline-primary btn-lg mt-3 px-4 py-2" >See More {{ rec.category|title }}</button>
 			</a>
 		</section>
+		{% endfor %}
 			{% else %}
 			<p>No recipes are available.</p>
 			{% endif %}

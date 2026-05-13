@@ -12,14 +12,20 @@ from .models import Recipe, Rating
 
 
 def index(request):
- recipe_list = Recipe.objects.order_by("-review_count")[:8]
- paginator = Paginator(recipe_list, 12)
+ pop_rec_category = "popular recipes"
+ pop_rec_list = Recipe.objects.order_by("-review_count")[:8]
+ pop_rec_link = 'recipes:browse'
 
- page_number = request.GET.get('page')
- page_obj = paginator.get_page(page_number)
- 
+ pop_rec = {'category': pop_rec_category, 'list': pop_rec_list, 'url': pop_rec_link}
+
+ rate_rec_category = "highly rated"
+ rate_rec_list = Recipe.objects.order_by("-aggregated_rating")[:8]
+ rate_rec_link = "recipes:browse"
+
+ rate_rec = {'category': rate_rec_category, 'list': rate_rec_list, 'url': rate_rec_link}
+
  return render(request, 'recipes/index.html', {
-     'page_obj': page_obj
+     'recs': [pop_rec, rate_rec]
  })
 
 def browse(request):
