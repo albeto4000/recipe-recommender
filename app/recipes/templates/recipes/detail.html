@@ -53,7 +53,7 @@
 
 			{% for rating in recipe.rating_set.all %}
 				<div class="card my-3 py-2">
-					<div class="card-body d-flex flex-column">
+					<div class="card-body d-flex flex-column h-auto">
 						<div>
 							{% for star in rating.rating|times %}
 								<i class="fa-solid fa-star"></i>
@@ -63,15 +63,12 @@
 							{% endfor %}
 						</div>
 						<div>{{ rating.review|safe }}</div>
-						<div class="mt-auto">{{ rating.user }}</div>
+						<div class="mt-auto pt-4">{{ rating.user }}</div>
 					</div>
-					
 				</div>
 			{% endfor %}
 		</div>
-
-
-
+		
 		<div class="modal fade" id="nutrition-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">

@@ -12,7 +12,7 @@ from .models import Recipe, Rating
 
 
 def index(request):
- recipe_list = Recipe.objects.order_by("id")[:8]
+ recipe_list = Recipe.objects.order_by("-review_count")[:8]
  paginator = Paginator(recipe_list, 12)
 
  page_number = request.GET.get('page')
@@ -23,7 +23,7 @@ def index(request):
  })
 
 def browse(request):
- recipe_list = Recipe.objects.order_by("id")
+ recipe_list = Recipe.objects.order_by("-review_count")
  paginator = Paginator(recipe_list, 12)
 
  page_number = request.GET.get('page')

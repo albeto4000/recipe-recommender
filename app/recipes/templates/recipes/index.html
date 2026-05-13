@@ -15,11 +15,17 @@
 		{% include 'recipes/navbar.html' %}
 		<div class="container pt-2 pb-4">
 			{% if page_obj %}
-			<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 h-100">
+		<section>
+			<div class="d-flex align-items-center">
+				<h3 class="me-2 p-2">POPULAR RECIPES</h3>
+				<div class="flex-grow-1 border-bottom border-primary border-5"></div>
+			</div>
+
+			<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-2 h-100">
 			{% for recipe in page_obj %}
 			<a href="/recipes/{{ recipe.id }}/" class="text-decoration-none">
 				<div class = "col">
-					<div class="card ">
+					<div class="card recipe-card">
 						{% if recipe.images != "character(0" %}
 							<img class = "card-img-top object-fit-cover" src = {{ recipe.images }} />
 						{% else %}
@@ -43,6 +49,11 @@
 					<!-- <li><a href="/recipes/{{ recipe.id }}/">{{ recipe.name }}</a></li> -->
 			{% endfor %}
 			</div>
+			
+			<a href="{% url 'recipes:browse' %}">
+				<button type="button" class="btn btn-outline-primary btn-lg mt-3 px-4 py-2" >See More Popular Recipes</button>
+			</a>
+		</section>
 			{% else %}
 			<p>No recipes are available.</p>
 			{% endif %}
