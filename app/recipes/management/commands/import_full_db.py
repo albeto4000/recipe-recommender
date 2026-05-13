@@ -42,7 +42,7 @@ class Command(BaseCommand):
 		)
 
 		#Handles any missing integer values
-		recipe_df.fillna(0, inplace = True);
+		recipe_df.update(recipe_df.select_dtypes(include='number').fillna(0));
 
 		ratings_df['DateSubmitted'] = pd.to_datetime(
 				ratings_df['DateSubmitted'],
@@ -77,7 +77,7 @@ class Command(BaseCommand):
 				batch_size=5000,
 		)
 
-		self.stdout.write(self.style.SUCCESS('Successfully imported user data'))
+		self.stdout.write(self.style.SUCCESS(datetime.now().strftime('%H:%M:%S') + 'Successfully imported user data'))
 
 		#Selects all recipe_author user objects
 		users = User.objects.in_bulk(field_name='id')
@@ -124,7 +124,7 @@ class Command(BaseCommand):
 				batch_size=5000,
 		)
 
-		self.stdout.write(self.style.SUCCESS('Successfully imported recipe data'))
+		self.stdout.write(self.style.SUCCESS(datetime.now().strftime('%H:%M:%S') + 'Successfully imported recipe data'))
 
 		#Selects all recipes
 		recipes = Recipe.objects.in_bulk(field_name='id')
@@ -149,4 +149,4 @@ class Command(BaseCommand):
 				batch_size=5000,
 		)
 
-		self.stdout.write(self.style.SUCCESS('Successfully imported ratings data'))
+		self.stdout.write(self.style.SUCCESS(datetime.now().strftime('%H:%M:%S') + 'Successfully imported ratings data'))

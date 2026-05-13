@@ -42,14 +42,14 @@ class Command(BaseCommand):
 		)
 
 		#Handles any missing integer values
-		recipe_df.fillna(0);
+		recipe_df.fillna(0, inplace = True);
 
 		ratings_df['DateSubmitted'] = pd.to_datetime(
 				ratings_df['DateSubmitted'],
 				errors='coerce'
 		)
 
-		recipe_sample = recipe_df.drop_duplicates(subset = ['AuthorId']).sample(n = 1000, random_state = 641).fillna(0)
+		recipe_sample = recipe_df.drop_duplicates(subset = ['AuthorId']).sample(n = 100, random_state = 641).fillna(0)
 		ratings_sample = ratings_df[ratings_df['RecipeId'].isin(recipe_sample['RecipeId'])]
 		
 		#Selects all user table columns and drops duplicates
@@ -80,7 +80,7 @@ class Command(BaseCommand):
 				batch_size=5000,
 		)
 
-		self.stdout.write(self.style.SUCCESS('Successfully imported user data'))
+		self.stdout.write(datetime.now().strftime('%H:%M:%S') + self.style.SUCCESS('Successfully imported user data'))
 
 		#Selects all recipe_author user objects
 		users = User.objects.in_bulk(field_name='id')
@@ -127,7 +127,7 @@ class Command(BaseCommand):
 				batch_size=5000,
 		)
 
-		self.stdout.write(self.style.SUCCESS('Successfully imported recipe data'))
+		self.stdout.write(datetime.now().strftime('%H:%M:%S') + self.style.SUCCESS('Successfully imported recipe data'))
 
 		#Selects all recipes
 		recipes = Recipe.objects.in_bulk(field_name='id')
@@ -152,4 +152,4 @@ class Command(BaseCommand):
 				batch_size=5000,
 		)
 
-		self.stdout.write(self.style.SUCCESS('Successfully imported ratings data'))
+		self.stdout.write(datetime.now().strftime('%H:%M:%S') + self.style.SUCCESS('Successfully imported ratings data'))

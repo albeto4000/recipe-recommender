@@ -28,16 +28,26 @@ def index(request):
      'recs': [pop_rec, rate_rec]
  })
 
-def browse(request):
- recipe_list = Recipe.objects.order_by("-review_count")
- paginator = Paginator(recipe_list, 12)
 
- page_number = request.GET.get('page')
- page_obj = paginator.get_page(page_number)
- 
- return render(request, 'recipes/browse.html', {
-     'page_obj': page_obj
- })
+def browse(request):
+	recipe_list = Recipe.objects.all()
+	query = request.GET.get('query')
+
+	if query:
+		recipe_list = recipe_list.filter(name__icontains=query)
+
+	recipe_list = recipe_list.order_by('-review_count')
+
+	paginator = Paginator(recipe_list, 12)
+
+	page_number = request.GET.get('page')
+	page_obj = paginator.get_page(page_number)
+
+	return render(request, 'recipes/browse.html', {
+		'page_obj': page_obj,
+		'query': query
+	})
+
 
 def detail(request, recipe_id):
 	recipe = get_object_or_404(Recipe, pk = recipe_id)
@@ -60,7 +70,4 @@ def detail(request, recipe_id):
 					'steps': steps, 
 					'minutes': minutes,
           'nutrition_info': list(zip(nutrition_labels, nutrition_vals, nutrition_units, nutrition_pct))
-  })
-	#return render(request, 'recipes/detail.html', {'recipe': recipe, 'steps': steps, 'ingredients': ingredients, 'url': url})
-		
-  
+  })	
