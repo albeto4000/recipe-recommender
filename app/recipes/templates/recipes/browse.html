@@ -13,6 +13,7 @@
 	</head>
 	<body>
 		{% include 'recipes/navbar.html' %}
+
 		<div class="container pt-2 pb-4">
 			{% if page_obj %}
 			<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 h-100">
@@ -46,8 +47,30 @@
 			{% else %}
 			<p>No recipes are available.</p>
 			{% endif %}
+
+			<!-- Pagination -->
+			<div class="pagination d-flex my-4 justify-content-center text-center">
+			{% if page_obj.has_previous %}
+				<a href="?page=1"><button class="btn"><i class="fa-solid fa-angles-left"></i></button></a>
+				<a href="?page={{ page_obj.previous_page_number }}"><button class="btn"><i class="fa-solid fa-angle-left"></i></button></a>
+			{% else %}
+				<button class="btn invisible"><i class="fa-solid fa-angles-left"></i></button>
+				<button class="btn invisible"><i class="fa-solid fa-angle-left"></i></button>
+			{% endif %}
+
+			<div class="text-center my-auto mx-2">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+
+			{% if page_obj.has_next %}
+				<a href="?page={{ page_obj.next_page_number }}"><button class="btn"><i class="fa-solid fa-angle-right"></i></button></a>
+				<a href="?page={{ page_obj.paginator.num_pages }}"><button class="btn"><i class="fa-solid fa-angles-right"></i></button></a>
+			{% else %}
+				<button class="btn invisible"><i class="fa-solid fa-angle-right"></i></button>
+				<button class="btn invisible"><i class="fa-solid fa-angles-right"></i></button>
+			{% endif %}
 		</div>
-		{% include 'recipes/search.html' %}
+
+	</div>
+	{% include 'recipes/search.html' %}
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 	</body>
 </html>

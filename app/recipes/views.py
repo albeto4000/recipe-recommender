@@ -10,15 +10,26 @@ import pandas as pd
 
 from .models import Recipe, Rating
 
-		
+
 def index(request):
- recipe_list = Recipe.objects.order_by("id")
+ recipe_list = Recipe.objects.order_by("id")[:8]
  paginator = Paginator(recipe_list, 12)
 
  page_number = request.GET.get('page')
  page_obj = paginator.get_page(page_number)
  
  return render(request, 'recipes/index.html', {
+     'page_obj': page_obj
+ })
+
+def browse(request):
+ recipe_list = Recipe.objects.order_by("id")
+ paginator = Paginator(recipe_list, 12)
+
+ page_number = request.GET.get('page')
+ page_obj = paginator.get_page(page_number)
+ 
+ return render(request, 'recipes/browse.html', {
      'page_obj': page_obj
  })
 
