@@ -7,7 +7,6 @@ from django.core.paginator import Paginator
 from django.utils.http import urlencode
 
 import re
-import pandas as pd
 
 from .models import Recipe, Rating
 
@@ -50,7 +49,7 @@ def browse(request):
 	category = request.GET.get('category')
 	if category:
 		recipe_list = recipe_list.filter(category=category)
-
+	
 	keywords = request.GET.get('keywords')
 	if keywords:
 		recipe_list = recipe_list.filter(keywords__icontains=keywords)

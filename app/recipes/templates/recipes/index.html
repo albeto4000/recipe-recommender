@@ -1,5 +1,6 @@
 {% load static %}
 {% load recipe_time %}
+{% load display_stars %}
 
 <!DOCTYPE html>
 <html>
@@ -36,7 +37,7 @@
 							<h5 class="card-title">{{ recipe.name|safe }}</h5>
 							<div class="d-flex mt-auto justify-content-between">
 								{% if recipe.review_count != 0 %}
-								<div><i class="fa-solid fa-star"></i> {{ recipe.aggregated_rating }} ({{ recipe.review_count }})</div>
+								<div>{% stars recipe.aggregated_rating True False %} ({{ recipe.review_count }})</div>
 								{% else %}
 								<div></div>
 								{% endif %}

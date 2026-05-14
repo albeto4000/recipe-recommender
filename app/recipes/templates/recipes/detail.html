@@ -1,6 +1,5 @@
-{% load range_filter %}
 {% load static %}
-{% load subtract %}
+{% load display_stars %}
 
 <!DOCTYPE html>
 <html>
@@ -56,12 +55,7 @@
 				<div class="card my-3 py-2">
 					<div class="card-body d-flex flex-column h-auto">
 						<div>
-							{% for star in rating.rating|times %}
-								<i class="fa-solid fa-star"></i>
-							{% endfor %}
-							{% for star in rating.rating|subtract:5|times %}
-								<i class="fa-regular fa-star"></i>
-							{% endfor %}
+							{% stars rating.rating False True %}
 						</div>
 						<div>{{ rating.review|safe }}</div>
 						<div class="mt-auto pt-4">{{ rating.user }}</div>
@@ -137,17 +131,22 @@
 							$(this).addClass('rating-star-active');
 							$(this).addClass('fa-solid');
 							$(this).removeClass('fa-regular');
+							$(this).addClass('text-warning');
+							//$(this).removeClass('text-dark');
 						}
 						else{
 							$(this).removeClass('rating-star-active');
 							$(this).removeClass('fa-solid');
 							$(this).addClass('fa-regular');
+							$(this).removeClass('text-warning');
+							//$(this).addClass('text-dark');
 						}
 					}
 					else{
 						$(this).removeClass('rating-star-active');
 						$(this).removeClass('fa-solid');
 						$(this).addClass('fa-regular');
+						$(this).removeClass('text-warning');
 					}
 				});
 			});
