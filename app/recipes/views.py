@@ -54,8 +54,7 @@ def browse(request):
 	page_obj = paginator.get_page(page_number)
 
 	return render(request, 'recipes/browse.html', {
-		'page_obj': page_obj,
-		'name': name
+		'page_obj': page_obj
 	})
 
 
