@@ -24,7 +24,7 @@
 						{% if recipe.images != "character(0" %}
 							<img class = "card-img-top object-fit-cover" src = {{ recipe.images }} />
 						{% else %}
-							<img class = "card-img-top object-fit-cover" src = 'https://upload.wikimedia.org/wikipedia/en/3/34/Food-com-logo.png' style = "object-fit:cover" />
+							<img class = "card-img-top object-fit-cover" src = '{% static 'recipes/Food-com-logo.png' %}' style = "object-fit:cover" />
 						{% endif %}
 						<div class="card-body px-2 d-flex flex-column recipe-card">
 							<h5 class="card-title">{{ recipe.name|safe }}</h5>
@@ -51,8 +51,8 @@
 			<!-- Pagination -->
 			<div class="pagination d-flex my-4 justify-content-center text-center">
 			{% if page_obj.has_previous %}
-				<a href="?query={{ query }}&page=1"><button class="btn"><i class="fa-solid fa-angles-left"></i></button></a>
-				<a href="?query={{ query }}&page={{ page_obj.previous_page_number }}"><button class="btn"><i class="fa-solid fa-angle-left"></i></button></a>
+				<a href="{% querystring page=1 %}"><button class="btn"><i class="fa-solid fa-angles-left"></i></button></a>
+				<a href="{% querystring page=page_obj.previous_page_number %}"><button class="btn"><i class="fa-solid fa-angle-left"></i></button></a>
 			{% else %}
 				<button class="btn invisible"><i class="fa-solid fa-angles-left"></i></button>
 				<button class="btn invisible"><i class="fa-solid fa-angle-left"></i></button>
@@ -61,8 +61,8 @@
 			<div class="text-center my-auto mx-2">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
 
 			{% if page_obj.has_next %}
-				<a href="?query={{ query }}&page={{ page_obj.next_page_number }}"><button class="btn"><i class="fa-solid fa-angle-right"></i></button></a>
-				<a href="?query={{ query }}&page={{ page_obj.paginator.num_pages }}"><button class="btn"><i class="fa-solid fa-angles-right"></i></button></a>
+				<a href="{% querystring page=page_obj.next_page_number %}""><button class="btn"><i class="fa-solid fa-angle-right"></i></button></a>
+				<a href="{% querystring page=page_obj.paginator.num_pages %}"><button class="btn"><i class="fa-solid fa-angles-right"></i></button></a>
 			{% else %}
 				<button class="btn invisible"><i class="fa-solid fa-angle-right"></i></button>
 				<button class="btn invisible"><i class="fa-solid fa-angles-right"></i></button>

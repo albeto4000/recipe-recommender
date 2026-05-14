@@ -18,27 +18,33 @@ def index(request):
 	pop_rec_category = "popular recipes"
 	pop_rec_list = Recipe.objects.order_by("-review_count")[:8]
 	pop_rec_link = base_url
-
 	pop_rec = {'category': pop_rec_category, 'list': pop_rec_list, 'url': pop_rec_link}
 
 	pizza_category = "pizza party"
 	pizza_list = Recipe.objects.filter(name__icontains='pizza').order_by("-review_count")[:8]
-	pizza_query = urlencode({'query': 'pizza'})
-	pizza_link = f"{base_url}?{pizza_query}"
-
+	pizza_link = f"{base_url}?{urlencode({'name': 'pizza'})}"
 	pizza_rec = {'category': pizza_category, 'list': pizza_list, 'url': pizza_link}
 
+	weeknight_category = "tonight's dinner"
+	weeknight_list = Recipe.objects.filter(category='Weeknight').order_by("-review_count")[:8]
+	weeknight_link = f"{base_url}?{urlencode({'category': 'Weeknight'})}"
+	weeknight_rec = {'category': weeknight_category, 'list': weeknight_list, 'url': weeknight_link}
+
 	return render(request, 'recipes/index.html', {
-		'recs': [pop_rec, pizza_rec]
+		'recs': [pop_rec, pizza_rec, weeknight_rec]
 	})
 
 
 def browse(request):
 	recipe_list = Recipe.objects.all()
-	query = request.GET.get('query')
+	
+	name = request.GET.get('name')
+	if name:
+		recipe_list = recipe_list.filter(name__icontains=name)
 
-	if query:
-		recipe_list = recipe_list.filter(name__icontains=query)
+	category = request.GET.get('category')
+	if category:
+		recipe_list = recipe_list.filter(category=category)
 
 	recipe_list = recipe_list.order_by('-review_count')
 
@@ -49,7 +55,7 @@ def browse(request):
 
 	return render(request, 'recipes/browse.html', {
 		'page_obj': page_obj,
-		'query': query
+		'name': name
 	})
 
 
