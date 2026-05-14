@@ -48,7 +48,7 @@
 			</a>
 			{% endfor %}
 			</div>
-			<a href={% url rec.url %}>
+			<a href="{{ rec.url }}"">
 				<button type="button" class="btn btn-outline-primary btn-lg mt-3 px-4 py-2" >See More {{ rec.category|title }}</button>
 			</a>
 		</section>

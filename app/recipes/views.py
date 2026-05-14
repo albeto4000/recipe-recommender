@@ -1,9 +1,10 @@
 from django.db.models import F
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 from django.core.paginator import Paginator
+from django.utils.http import urlencode
 
 import re
 import pandas as pd
@@ -12,21 +13,24 @@ from .models import Recipe, Rating
 
 
 def index(request):
- pop_rec_category = "popular recipes"
- pop_rec_list = Recipe.objects.order_by("-review_count")[:8]
- pop_rec_link = 'recipes:browse'
+	base_url = reverse("recipes:browse")
 
- pop_rec = {'category': pop_rec_category, 'list': pop_rec_list, 'url': pop_rec_link}
+	pop_rec_category = "popular recipes"
+	pop_rec_list = Recipe.objects.order_by("-review_count")[:8]
+	pop_rec_link = base_url
 
- rate_rec_category = "highly rated"
- rate_rec_list = Recipe.objects.order_by("-aggregated_rating")[:8]
- rate_rec_link = "recipes:browse"
+	pop_rec = {'category': pop_rec_category, 'list': pop_rec_list, 'url': pop_rec_link}
 
- rate_rec = {'category': rate_rec_category, 'list': rate_rec_list, 'url': rate_rec_link}
+	pizza_category = "pizza party"
+	pizza_list = Recipe.objects.filter(name__icontains='pizza').order_by("-review_count")[:8]
+	pizza_query = urlencode({'query': 'pizza'})
+	pizza_link = f"{base_url}?{pizza_query}"
 
- return render(request, 'recipes/index.html', {
-     'recs': [pop_rec, rate_rec]
- })
+	pizza_rec = {'category': pizza_category, 'list': pizza_list, 'url': pizza_link}
+
+	return render(request, 'recipes/index.html', {
+		'recs': [pop_rec, pizza_rec]
+	})
 
 
 def browse(request):
