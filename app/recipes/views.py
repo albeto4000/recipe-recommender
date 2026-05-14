@@ -30,8 +30,13 @@ def index(request):
 	weeknight_link = f"{base_url}?{urlencode({'category': 'Weeknight'})}"
 	weeknight_rec = {'category': weeknight_category, 'list': weeknight_list, 'url': weeknight_link}
 
+	spring_category = "flavors of spring"
+	spring_list = Recipe.objects.filter(keywords__icontains='spring').order_by("-review_count")[:8]
+	spring_link = f"{base_url}?{urlencode({'keywords': 'spring'})}"
+	spring_rec = {'category': spring_category, 'list': spring_list, 'url': spring_link}
+
 	return render(request, 'recipes/index.html', {
-		'recs': [pop_rec, pizza_rec, weeknight_rec]
+		'recs': [pop_rec, pizza_rec, weeknight_rec, spring_rec]
 	})
 
 
@@ -45,6 +50,10 @@ def browse(request):
 	category = request.GET.get('category')
 	if category:
 		recipe_list = recipe_list.filter(category=category)
+
+	keywords = request.GET.get('keywords')
+	if keywords:
+		recipe_list = recipe_list.filter(keywords__icontains=keywords)
 
 	recipe_list = recipe_list.order_by('-review_count')
 
