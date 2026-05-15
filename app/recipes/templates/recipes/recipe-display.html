@@ -1,0 +1,31 @@
+{% load static %}
+{% load recipe_time %}
+{% load display_stars %}
+
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 h-100">
+{% for recipe in recipes %}
+    <a href="/recipes/{{ recipe.id }}/" class="text-decoration-none">
+        <div class = "col">
+            <div class="card">
+                {% if recipe.images != "character(0" %}
+                    <img class = "card-img-top object-fit-cover" src = {{ recipe.images }} />
+                {% else %}
+                    <img class = "card-img-top object-fit-cover" src = '{% static 'recipes/Food-com-logo.png' %}' style = "object-fit:cover" />
+                {% endif %}
+                <div class="card-body px-2 d-flex flex-column recipe-card">
+                    <h5 class="card-title">{{ recipe.name|safe }}</h5>
+                        <div class="d-flex mt-auto justify-content-between">
+                            {% if recipe.review_count != 0 %}
+                            <div>{% stars recipe.aggregated_rating True False %} ({{ recipe.review_count }})</div>
+                            {% else %}
+                            <div></div>
+                            {% endif %}
+                            <div><i class="fa-solid fa-clock"></i> {{ recipe.minutes|recipe_time }}</div>
+                        </div>
+                    
+                </div>
+            </div>
+        </div>
+    </a>
+{% endfor %}
+</div>
