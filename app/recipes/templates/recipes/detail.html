@@ -14,9 +14,7 @@
 
 		<div class="container pt-2 pb-4">
 			<h1>{{ recipe.name|title|safe }}</h1>
-			{% for i in 5|times %}
-				<i role="button" value="{{ i|add:"1" }}" class="fa-regular fa-star rating-star"></i>
-			{% endfor %}
+			<div id="rating-input"></div>
 			<hr />
 			<h5>Submitted by {{ recipe.contributor|title }}</h5>
 			<div class="fst-italic">"{{ recipe.description|capfirst|safe }}"</div>
@@ -102,6 +100,10 @@
 	<script>
 		//Uses javascript/jQuery to update the rating stars as the user interacts with them
 		$(document).ready(function(){
+			for(var i = 0; i < 5; i++){
+				$('#rating-input').append("<i role='button' value=" + i + " class='fa-regular fa-star rating-star'></i>");
+			}
+
 			$(document).on('click', '#show-nutrition', function(){
 				$('#nutrition-modal').modal('show');
 			});
@@ -162,7 +164,7 @@
 					}
 				});
 			});
-
+			
 			//On star mouseout, reset the rating (if the rating isn't active)
 			$(document).on('mouseout', '.rating-star', function(){
 				$('.rating-star').each(function(){

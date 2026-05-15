@@ -1,4 +1,4 @@
-from django.db.models import F
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -9,7 +9,6 @@ from django.utils.http import urlencode
 import re
 
 from .models import Recipe, Rating
-
 
 def index(request):
 	base_url = reverse("recipes:browse")
@@ -41,20 +40,22 @@ def index(request):
 
 def browse(request):
 	recipe_list = Recipe.objects.all()
+
+	query = Q()
 	
 	name = request.GET.get('name')
 	if name:
-		recipe_list = recipe_list.filter(name__icontains=name)
+		query |= Q(name__icontains=name)
 
 	category = request.GET.get('category')
 	if category:
-		recipe_list = recipe_list.filter(category=category)
-	
+		query |= Q(category=category)
+
 	keywords = request.GET.get('keywords')
 	if keywords:
-		recipe_list = recipe_list.filter(keywords__icontains=keywords)
+		query |= Q(keywords__icontains=keywords)
 
-	recipe_list = recipe_list.order_by('-review_count')
+	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
 
 	paginator = Paginator(recipe_list, 12)
 
@@ -87,4 +88,12 @@ def detail(request, recipe_id):
 					'steps': steps, 
 					'minutes': minutes,
           'nutrition_info': list(zip(nutrition_labels, nutrition_vals, nutrition_units, nutrition_pct))
-  })	
+  })
+
+
+def search(request):
+	season_filter = {'category': 'season', 'choices': ['spring', 'summer', 'fall', 'winter']}
+
+	return render(request, 'recipes/search.html', {
+		'filters': [season_filter]
+	})

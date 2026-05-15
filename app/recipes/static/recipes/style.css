@@ -8,3 +8,11 @@
 #recipe-img{
 	height: 400px;
 }
+
+.dropdown-toggle{
+	width:200px;
+}
+
+.dropdown-menu{
+	width:200px;
+}
