@@ -46,15 +46,15 @@ def browse(request):
 	
 	name = request.GET.get('name')
 	if name:
-		query |= Q(name__icontains=name)
+		query &= Q(name__icontains=name)
 
 	category = request.GET.get('category')
 	if category:
-		query |= Q(category=category)
+		query &= Q(category=category)
 
 	keywords = request.GET.get('keywords')
 	if keywords:
-		query |= Q(keywords__icontains=keywords)
+		query &= Q(keywords__icontains=keywords)
 
 	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
 
@@ -71,8 +71,11 @@ def browse(request):
 def detail(request, recipe_id):
 	recipe = get_object_or_404(Recipe, pk = recipe_id)
 	ingredients = re.sub(r'(c\()|\)|"', '', recipe.ingredients).split(', ')
+	#recipes.ingredients.lstrip('[').rstrip(']').split(', ')
 	ing_amounts = re.sub(r'(c\()|\)|"', '', recipe.ingredient_quantities).split(', ')
+	#ing_amounts = recipes.ingredient_quantities.split()
 	steps = re.sub(r'(c\()|\)|"', '', recipe.instructions).split(', ')
+	#
     
 	minutes = re.sub(r'\D', '', recipe.minutes)
 	nutrition_labels = ['Calories', 'Total Fat', 'Saturated Fat', 'Cholesterol', 'Sodium', 'Total Carbohydrate', 'Dietary Fiber', 'Sugars', 'Protein']
@@ -92,11 +95,12 @@ def detail(request, recipe_id):
   })
 
 
-def search(request):	
+def search(request):
 	season_filter = {'category': 'season', 'choices': ['spring', 'summer', 'fall', 'winter'], 'filters': 'keywords'}
+	protein_filter = {'category': 'protein', 'choices': ['beef', 'chicken', 'pork', 'turkey'], 'filters': 'keywords'}
 
 	return render(request, 'recipes/search.html', {
-		'filters': [season_filter]
+		'filters': [season_filter, protein_filter]
 	})
 
 def query(request):
@@ -106,15 +110,15 @@ def query(request):
 	
 	name = request.GET.get('name')
 	if name:
-		query |= Q(name__icontains=name)
+		query &= Q(name__icontains=name)
 
 	category = request.GET.get('category')
 	if category:
-		query |= Q(category=category)
+		query &= Q(category=category)
 
 	keywords = request.GET.get('keywords')
 	if keywords:
-		query |= Q(keywords__icontains=keywords)
+		query &= Q(keywords__icontains=keywords)
 
 	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
 

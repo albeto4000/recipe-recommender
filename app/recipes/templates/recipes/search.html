@@ -25,7 +25,7 @@
 					
 					<!--Season Dropdown-->
 					{% for filter in filters %}
-					<div class="dropdown form-group">
+					<div class="dropdown form-group mb-2">
 						<button class="btn border border-dark border-2 dropdown-toggle py-2 px-3 filter-form-input" id="{{ filter.category }}-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside">
 							By {{ filter.category|title }}
 						</button>
@@ -58,6 +58,7 @@
 			$.ajax({
 				url: "/recipes/query/",
 				type: "GET",
+				data: {'keywords': 'pennsylvania dutch'},
 				success: function(response){
 					$("#recipe-view").html(response);
 				}
