@@ -1,176 +1,170 @@
-{% load static %}
+{% extends "recipes/base.html" %}
 {% load display_stars %}
 
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>{{recipe.name|title}} Recipe</title>
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-		<link rel="stylesheet" href="{% static 'recipes/style.css' %}" />
-	</head>
-	<body>
-		{% include 'recipes/navbar.html' %}
+{% block title %}{{recipe.name|title}} Recipe{% endblock %}
 
-		<div class="container pt-2 pb-4">
-			<h1>{{ recipe.name|title|safe }}</h1>
-			<div id="rating-input"></div>
-			<hr />
-			<h5>Submitted by {{ recipe.contributor|title }}</h5>
-			<div class="fst-italic">"{{ recipe.description|capfirst|safe }}"</div>
-			<br />
-				{% if recipe.images != "character(0" %}
-				<img id="recipe-img" src={{ recipe.images }} class="img-rounded" />
+{% block content %}
+<div class="container pt-2 pb-4">
+	<h1>{{ recipe.name|title|safe }}</h1>
+	<div id="rating-input"></div>
+	<hr />
+	<h5>Submitted by {{ recipe.contributor|title }}</h5>
+	<div class="fst-italic">"{{ recipe.description|capfirst|safe }}"</div>
+	<br />
+		{% if recipe.images != "character(0" %}
+		<img id="recipe-img" src={{ recipe.images }} class="img-rounded" />
+		{% else %}
+		<img id="recipe-img" src = 'https://upload.wikimedia.org/wikipedia/en/3/34/Food-com-logo.png' class="img-rounded"/>
+		{% endif %}
+		<div class = "mt-4 mb-2" id="recipe-info">
+			<div class="my-2"><i class="fa-regular fa-clock"></i> Ready in {{ minutes }} minutes</div>
+			<div class="my-2"><i class="fa-solid fa-apple-whole"></i> Ingredients: {{ n_ingredients }}</div>
+			<div class="my-2"><i class="fa-solid fa-bowl-food"></i> Servings: {{ recipe.servings }}</div>
+			<div class="my-2 link-primary" id="show-nutrition" role="button" data-bs-toggle="modal" data-bs-target="#nutrition-modal">Nutrition Information</div>
+		</div>
+		<hr />
+		<h2>Ingredients</h2>
+		<ul>
+			{% for quantity, ingredient in ingredients %}
+				{% if quantity != 'NA' %}
+					<li>{{ quantity }} {{ ingredient|title }}</li>
 				{% else %}
-				<img id="recipe-img" src = 'https://upload.wikimedia.org/wikipedia/en/3/34/Food-com-logo.png' class="img-rounded"/>
-				{% endif %}
-				<div class = "mt-4 mb-2" id="recipe-info">
-					<div class="my-2"><i class="fa-regular fa-clock"></i> Ready in {{ minutes }} minutes</div>
-					<div class="my-2"><i class="fa-solid fa-apple-whole"></i> Ingredients: {{ n_ingredients }}</div>
-					<div class="my-2"><i class="fa-solid fa-bowl-food"></i> Servings: {{ recipe.servings }}</div>
-					<div class="my-2 link-primary" id="show-nutrition" role="button" data-bs-toggle="modal" data-bs-target="#nutrition-modal">Nutrition Information</div>
-				</div>
-				<hr />
-				<h2>Ingredients</h2>
-				<ul>
-					{% for quantity, ingredient in ingredients %}
-						{% if quantity != 'NA' %}
-							<li>{{ quantity }} {{ ingredient|title }}</li>
-						{% else %}
-							<li>{{ ingredient|title }}</li>
-						{% endif %}
-					{% endfor %}
-				</ul>
-				<h2>Steps</h2>
-				<ol>
-					{% for step in steps %}
-					<li>{{ step|capfirst }}</li>
-					{% endfor %}
-				</ol>
-				
-			{% for rating in recipe.rating_set.all %}
-				{% if forloop.counter <= 20 %}
-				<div class="card my-3 py-2">
-					<div class="card-body d-flex flex-column h-auto">
-						<div>
-							{% stars rating.rating False True %}
-						</div>
-						<div>{{ rating.review|safe }}</div>
-						<div class="mt-auto pt-4">{{ rating.user }}</div>
-					</div>
-				</div>
+					<li>{{ ingredient|title }}</li>
 				{% endif %}
 			{% endfor %}
-		</div>
+		</ul>
+		<h2>Steps</h2>
+		<ol>
+			{% for step in steps %}
+			<li>{{ step|capfirst }}</li>
+			{% endfor %}
+		</ol>
 		
-		<div class="modal fade" id="nutrition-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h1 class="modal-title fs-5" id="staticBackdropLabel">Nutrition Information</h1>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<table class="table table-striped">
-							<thead>
-								<tr>
-									<th>Nutrient</th>
-									<th>Amount Per Serving</th>
-									<th>% Daily Value</th>
-								</tr>
-							</thead>
-							<tbody>
-								{% for label, value, unit, pct_dv in nutrition_info %}
-								<tr>
-									<td>{{ label }}</td>
-									<td>{{ value }}{{ unit }}</td>
-									<td>{{ pct_dv|floatformat:2 }}</td>
-								</tr>
-								{% endfor %}
-							</tbody>
-						</table>
-					</div>
+	{% for rating in recipe.rating_set.all %}
+		{% if forloop.counter <= 20 %}
+		<div class="card my-3 py-2">
+			<div class="card-body d-flex flex-column h-auto">
+				<div>
+					{% stars rating.rating False True %}
 				</div>
+				<div>{{ rating.review|safe }}</div>
+				<div class="mt-auto pt-4">{{ rating.user }}</div>
 			</div>
 		</div>
-	{% include "recipes/scripts.html" %}
-	<script>
-		//Uses javascript/jQuery to update the rating stars as the user interacts with them
-		$(document).ready(function(){
-			for(var i = 0; i < 5; i++){
-				$('#rating-input').append("<i role='button' value=" + i + " class='fa-regular fa-star rating-star'></i>");
+		{% endif %}
+	{% endfor %}
+</div>
+
+<div class="modal fade" id="nutrition-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="staticBackdropLabel">Nutrition Information</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>Nutrient</th>
+							<th>Amount Per Serving</th>
+							<th>% Daily Value</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for label, value, unit, pct_dv in nutrition_info %}
+						<tr>
+							<td>{{ label }}</td>
+							<td>{{ value }}{{ unit }}</td>
+							<td>{{ pct_dv|floatformat:2 }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+	//Uses javascript/jQuery to update the rating stars as the user interacts with them
+	$(document).ready(function(){
+		for(var i = 0; i < 5; i++){
+			$('#rating-input').append("<i role='button' value=" + i + " class='fa-regular fa-star rating-star'></i>");
+		}
+
+		$(document).on('click', '#show-nutrition', function(){
+			$('#nutrition-modal').modal('show');
+		});
+
+		$(document).on('click', '.btn-close', function(){
+			$('#nutrition-modal').modal('hide');
+		});
+
+		var is_rated = false;
+		var rating = 0;
+		
+		//On rating star click
+		$(document).on('click', '.rating-star', function(){
+			val = $(this).attr('value');
+
+			if(val == rating){
+				rating = !rating;
+			}
+			else{
+				rating = val;
 			}
 
-			$(document).on('click', '#show-nutrition', function(){
-				$('#nutrition-modal').modal('show');
-			});
 
-			$(document).on('click', '.btn-close', function(){
-				$('#nutrition-modal').modal('hide');
-			});
-
-			var is_rated = false;
-			var rating = 0;
-			
-			//On rating star click
-			$(document).on('click', '.rating-star', function(){
-				val = $(this).attr('value');
-
-				if(val == rating){
-					rating = !rating;
-				}
-				else{
-					rating = val;
-				}
-
-
-				$('.rating-star').each(function(){
-					if(rating){
-						if($(this).attr('value') <= val){
-							$(this).addClass('rating-star-active');
-							$(this).addClass('fa-solid');
-							$(this).removeClass('fa-regular');
-							$(this).addClass('text-warning');
-							//$(this).removeClass('text-dark');
-						}
-						else{
-							$(this).removeClass('rating-star-active');
-							$(this).removeClass('fa-solid');
-							$(this).addClass('fa-regular');
-							$(this).removeClass('text-warning');
-							//$(this).addClass('text-dark');
-						}
+			$('.rating-star').each(function(){
+				if(rating){
+					if($(this).attr('value') <= val){
+						$(this).addClass('rating-star-active');
+						$(this).addClass('fa-solid');
+						$(this).removeClass('fa-regular');
+						$(this).addClass('text-warning');
+						//$(this).removeClass('text-dark');
 					}
 					else{
 						$(this).removeClass('rating-star-active');
 						$(this).removeClass('fa-solid');
 						$(this).addClass('fa-regular');
 						$(this).removeClass('text-warning');
+						//$(this).addClass('text-dark');
 					}
-				});
-			});
-
-			//On star mouseover, fill in all stars up to that value
-			$(document).on('mouseover', '.rating-star', function(){
-				val = $(this).attr('value');
-				
-				$('.rating-star').each(function(){
-					if($(this).attr('value') <= val){
-						$(this).addClass('fa-solid');
-						$(this).removeClass('fa-regular');
-					}
-				});
-			});
-			
-			//On star mouseout, reset the rating (if the rating isn't active)
-			$(document).on('mouseout', '.rating-star', function(){
-				$('.rating-star').each(function(){
-					if($(this).hasClass('rating-star-active') == false){
-						$(this).addClass('fa-regular');
-						$(this).removeClass('fa-solid');
-					}
-				});
+				}
+				else{
+					$(this).removeClass('rating-star-active');
+					$(this).removeClass('fa-solid');
+					$(this).addClass('fa-regular');
+					$(this).removeClass('text-warning');
+				}
 			});
 		});
-	</script>
-	</body>
-</html>
+
+		//On star mouseover, fill in all stars up to that value
+		$(document).on('mouseover', '.rating-star', function(){
+			val = $(this).attr('value');
+			
+			$('.rating-star').each(function(){
+				if($(this).attr('value') <= val){
+					$(this).addClass('fa-solid');
+					$(this).removeClass('fa-regular');
+				}
+			});
+		});
+		
+		//On star mouseout, reset the rating (if the rating isn't active)
+		$(document).on('mouseout', '.rating-star', function(){
+			$('.rating-star').each(function(){
+				if($(this).hasClass('rating-star-active') == false){
+					$(this).addClass('fa-regular');
+					$(this).removeClass('fa-solid');
+				}
+			});
+		});
+	});
+</script>
+{% endblock %}

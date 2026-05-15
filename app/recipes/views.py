@@ -103,6 +103,7 @@ def search(request):
 		'filters': [season_filter, protein_filter]
 	})
 
+
 def query(request):
 	recipe_list = Recipe.objects.all()
 
@@ -121,7 +122,7 @@ def query(request):
 		query &= Q(keywords__icontains=keywords)
 
 	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
-
+	
 	data = list(recipe_list.values('id', 'images', 'name', 'aggregated_rating', 'review_count', 'minutes'))[:8]
 
 	if request.headers.get('x-requested-with') == 'XMLHttpRequest':

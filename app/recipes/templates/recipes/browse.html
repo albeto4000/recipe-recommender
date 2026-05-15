@@ -1,54 +1,39 @@
-{% load static %}
+{% extends "recipes/base.html" %}
 
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>DSCI641 Recipe Recommender</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-		<link rel="stylesheet" href="{% static 'recipes/style.css' %}" />
-		<script src="https://kit.fontawesome.com/4b01eb49dd.js" crossorigin="anonymous"></script>
-	</head>
-	<body class="d-flex flex-column min-vh-100">
-		{% include 'recipes/navbar.html' %}
+{% block title %}DSCI641 Recipe Recommender{% endblock %}
 
-		<div class="container pt-2 pb-4">
-			{% if page_obj %}
-			<section class="py-2">
-				<div class="d-flex align-items-center">
-					<h3 class="me-2 p-2">{{ page_obj.paginator.count }} RESULTS</h3>
-					<!-- <div class="flex-grow-1 border-bottom border-primary border-5"></div> -->
-				</div>
-				{% include 'recipes/recipe-display.html' with recipes=page_obj %}
-			</section>
-			{% else %}
-			<p>No recipes are available.</p>
-			{% endif %}
-
-		<!-- Pagination -->
-		<div class="pagination d-flex my-4 justify-content-center text-center">
-		{% if page_obj.has_previous %}
-			<a href="{% querystring page=1 %}"><button class="btn"><i class="fa-solid fa-angles-left"></i></button></a>
-			<a href="{% querystring page=page_obj.previous_page_number %}"><button class="btn"><i class="fa-solid fa-angle-left"></i></button></a>
-			{% else %}
-			<button class="btn invisible"><i class="fa-solid fa-angles-left"></i></button>
-			<button class="btn invisible"><i class="fa-solid fa-angle-left"></i></button>
-			{% endif %}
-			
-			<!-- <div class="text-center my-auto mx-2">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div> -->
-
-			{% if page_obj.has_next %}
-			<a href="{% querystring page=page_obj.next_page_number %}""><button class="btn"><i class="fa-solid fa-angle-right"></i></button></a>
-			<a href="{% querystring page=page_obj.paginator.num_pages %}"><button class="btn"><i class="fa-solid fa-angles-right"></i></button></a>
-			{% else %}
-			<button class="btn invisible"><i class="fa-solid fa-angle-right"></i></button>
-			<button class="btn invisible"><i class="fa-solid fa-angles-right"></i></button>
-			{% endif %}
+{% block content %}
+<div class="container pt-2 pb-4">
+	{% if page_obj %}
+	<section class="py-2">
+		<div class="d-flex align-items-center">
+			<h3 class="me-2 p-2">{{ page_obj.paginator.count }} RESULTS</h3>
 		</div>
+		{% include 'recipes/recipe-display.html' with recipes=page_obj %}
+	</section>
+	{% else %}
+	<p>No recipes are available.</p>
+	{% endif %}
 
+	<!-- Pagination -->
+	<div class="pagination d-flex my-4 justify-content-center text-center">
+	{% if page_obj.has_previous %}
+		<a href="{% querystring page=1 %}"><button class="btn"><i class="fa-solid fa-angles-left"></i></button></a>
+		<a href="{% querystring page=page_obj.previous_page_number %}"><button class="btn"><i class="fa-solid fa-angle-left"></i></button></a>
+		{% else %}
+		<button class="btn invisible"><i class="fa-solid fa-angles-left"></i></button>
+		<button class="btn invisible"><i class="fa-solid fa-angle-left"></i></button>
+		{% endif %}
+		
+		{% if page_obj.has_next %}
+		<a href="{% querystring page=page_obj.next_page_number %}""><button class="btn"><i class="fa-solid fa-angle-right"></i></button></a>
+		<a href="{% querystring page=page_obj.paginator.num_pages %}"><button class="btn"><i class="fa-solid fa-angles-right"></i></button></a>
+		{% else %}
+		<button class="btn invisible"><i class="fa-solid fa-angle-right"></i></button>
+		<button class="btn invisible"><i class="fa-solid fa-angles-right"></i></button>
+		{% endif %}
 	</div>
-	{% include 'recipes/search-section.html' %}
-	{% include "recipes/scripts.html" %}
-	</body>
-</html>
+
+</div>
+{% include 'recipes/search-section.html' %}
+{% endblock %}

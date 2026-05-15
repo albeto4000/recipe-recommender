@@ -8,19 +8,19 @@
         <div class = "col">
             <div class="card">
                 {% if recipe.images != "character(0" %}
-                    <img class = "card-img-top object-fit-cover" src = {{ recipe.images }} />
+									<img class = "card-img-top object-fit-cover" src = {{ recipe.images }} />
                 {% else %}
-                    <img class = "card-img-top object-fit-cover" src = '{% static 'recipes/Food-com-logo.png' %}' style = "object-fit:cover" />
+									<img class = "card-img-top object-fit-cover" src = '{% static 'recipes/Food-com-logo.png' %}' style = "object-fit:cover" />
                 {% endif %}
                 <div class="card-body px-2 d-flex flex-column recipe-card">
-                    <h5 class="card-title">{{ recipe.name|safe }}</h5>
-                    <div class="d-flex mt-auto justify-content-between">
-                        {% if recipe.review_count != 0 %}
-                        <div>{% stars recipe.aggregated_rating True False %} ({{ recipe.review_count }})</div>
-                        {% else %}
-                        <div></div>
-                        {% endif %}
-                        <div><i class="fa-solid fa-clock"></i> {{ recipe.minutes|recipe_time }}</div>
+									<h5 class="card-title">{{ recipe.name|safe }}</h5>
+									<div class="d-flex mt-auto justify-content-between">
+											<div>
+												{% if recipe.review_count != 0 %}
+													{% stars recipe.aggregated_rating True False %} ({{ recipe.review_count }})
+												{% endif %}
+											</div>
+											<div><i class="fa-solid fa-clock"></i> {{ recipe.minutes|recipe_time }}</div>
                     </div>
                 </div>
             </div>
