@@ -86,25 +86,16 @@ def detail(request, recipe_id):
 	nutrition_pct = [round((val / dv) * 100, 2) for val, dv in zip(nutrition_vals, nutrition_dv)]
 
 	return render(request, 'recipes/detail.html', {
-          'recipe': recipe, 
-          'ingredients': list(zip(ing_amounts, ingredients)), 
-          'n_ingredients': len(ingredients),
-					'steps': steps, 
-					'minutes': minutes,
-          'nutrition_info': list(zip(nutrition_labels, nutrition_vals, nutrition_units, nutrition_pct))
+		'recipe': recipe, 
+		'ingredients': list(zip(ing_amounts, ingredients)), 
+		'n_ingredients': len(ingredients),
+		'steps': steps, 
+		'minutes': minutes,
+		'nutrition_info': list(zip(nutrition_labels, nutrition_vals, nutrition_units, nutrition_pct))
   })
 
 
 def search(request):
-	season_filter = {'category': 'season', 'choices': ['spring', 'summer', 'fall', 'winter'], 'filters': 'keywords'}
-	protein_filter = {'category': 'protein', 'choices': ['beef', 'chicken', 'pork', 'turkey'], 'filters': 'keywords'}
-
-	return render(request, 'recipes/search.html', {
-		'filters': [season_filter, protein_filter]
-	})
-
-
-def query(request):
 	recipe_list = Recipe.objects.all()
 
 	query = Q()
@@ -122,10 +113,48 @@ def query(request):
 		query &= Q(keywords__icontains=keywords)
 
 	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
+
+	paginator = Paginator(recipe_list, 12)
+
+	page_number = request.GET.get('page')
+	page_obj = paginator.get_page(page_number)
 	
-	data = list(recipe_list.values('id', 'images', 'name', 'aggregated_rating', 'review_count', 'minutes'))[:8]
+	season_filter = {'category': 'season', 'choices': ['spring', 'summer', 'fall', 'winter'], 'filters': 'keywords'}
+	protein_filter = {'category': 'protein', 'choices': ['beef', 'chicken', 'pork', 'turkey'], 'filters': 'keywords'}
+
+	return render(request, 'recipes/search.html', {
+		'filters': [season_filter, protein_filter],
+		'page_obj': page_obj
+	})
+
+
+def query(request):
+	recipe_list = Recipe.objects.all()
+
+	query = Q()
+	
+	name = request.GET.get('name')
+	if name:
+		query &= Q(name__icontains=name)
+
+	category = request.GET.get('category')
+	if category:
+		query &= Q(category=category)
+	
+	keywords = request.GET.get('keywords')
+	if keywords:
+		query &= Q(keywords__icontains=keywords)
+
+	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
+
+	#data = list(recipe_list.values('id', 'images', 'name', 'aggregated_rating', 'review_count', 'minutes'))
+
+	paginator = Paginator(recipe_list, 12)
+
+	page_number = request.GET.get('page')
+	page_obj = paginator.get_page(page_number)
 
 	if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-		return render(request, 'recipes/recipe-display.html', {
-			'recipes': data
+		return render(request, 'recipes/paginated-recipes.html', {
+			'page_obj': page_obj
 		})
