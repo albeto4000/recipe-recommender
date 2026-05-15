@@ -92,7 +92,7 @@ def detail(request, recipe_id):
 
 
 def search(request):
-	season_filter = {'category': 'season', 'choices': ['spring', 'summer', 'fall', 'winter']}
+	season_filter = {'category': 'season', 'choices': ['spring', 'summer', 'fall', 'winter'], 'filters': 'keywords'}
 
 	return render(request, 'recipes/search.html', {
 		'filters': [season_filter]

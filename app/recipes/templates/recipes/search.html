@@ -1,6 +1,5 @@
 {% load static %}
 {% load recipe_time %}
-{% load filter_checks %}
 
 <!DOCTYPE html>
 <html>
@@ -18,25 +17,31 @@
 			<!-- Filter Sidebar -->
 			<div class="d-flex flex-column flex-shrink-0 p-3">
 				<h3>FILTER RECIPES</h3>
-				
-				<!--Season Dropdown-->
-				{% for filter in filters %}
-				<div class="dropdown">
-					<button class="btn border border-dark border-2 dropdown-toggle py-2 px-3" id="{{ filter.category }}-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-						By {{ filter.category|title }}
-					</button>
-					<ul class="dropdown-menu shadow p-2" aria-labelledby="{{ filter.category }}-dropdown">
-						{% for choice in filter.choices %}
-						<li>
-							<div class="form-check">
-								<input class="form-check-input" type="checkbox" id="{{ filter.category }}-{{ choice }}-check">
-								<label class="form-check-label" for="{{ filter.category }}-{{ choice }}-check">{{ choice|title }}</label>
-							</div>
-						</li>
+				<form action="{% url 'recipes:browse' %}" role="search" method="get">
+					<div class="d-flex pt-2 pb-3 form-group filter-form-input">
+						<input class="form-control me-2" type="search" name="name" aria-label="Search"/>
+						<button class="btn btn-outline-success" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+					</div>
+					
+					<!--Season Dropdown-->
+					{% for filter in filters %}
+					<div class="dropdown form-group">
+						<button class="btn border border-dark border-2 dropdown-toggle py-2 px-3 filter-form-input" id="{{ filter.category }}-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+							By {{ filter.category|title }}
+						</button>
+						<ul class="dropdown-menu shadow p-2 filter-form-input" aria-labelledby="{{ filter.category }}-dropdown">
+							{% for choice in filter.choices %}
+							<li>
+								<div class="form-group form-check mx-2 my-1">
+									<input class="form-check-input border border-dark border-1" type="checkbox" name="{{ filter.filters }}" value="{{ choice }}" id="{{ filter.category }}-{{ choice }}-check">
+									<label class="form-check-label" for="{{ filter.category }}-{{ choice }}-check">{{ choice|title }} Recipes</label>
+								</div>
+							</li>
 						{% endfor %}
 					</ul>
 				</div>
 				{% endfor %}
+			</form>
 		</div>
 			<!--Page Content-->
 			<div class="flex-grow-1">
