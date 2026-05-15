@@ -1,10 +1,11 @@
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 from django.core.paginator import Paginator
 from django.utils.http import urlencode
+from django.core import serializers
 
 import re
 
@@ -91,9 +92,35 @@ def detail(request, recipe_id):
   })
 
 
-def search(request):
+def search(request):	
 	season_filter = {'category': 'season', 'choices': ['spring', 'summer', 'fall', 'winter'], 'filters': 'keywords'}
 
 	return render(request, 'recipes/search.html', {
 		'filters': [season_filter]
 	})
+
+def query(request):
+	recipe_list = Recipe.objects.all()
+
+	query = Q()
+	
+	name = request.GET.get('name')
+	if name:
+		query |= Q(name__icontains=name)
+
+	category = request.GET.get('category')
+	if category:
+		query |= Q(category=category)
+
+	keywords = request.GET.get('keywords')
+	if keywords:
+		query |= Q(keywords__icontains=keywords)
+
+	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
+
+	data = list(recipe_list.values('id', 'images', 'name', 'aggregated_rating', 'review_count', 'minutes'))[:8]
+
+	if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+		return render(request, 'recipes/recipe-display.html', {
+			'recipes': data
+		})

@@ -6,5 +6,6 @@ urlpatterns = [
 		path("", views.index, name = "index"),
 		path("<int:recipe_id>/", views.detail, name = "detail"),
 		path("browse/", views.browse, name = "browse"),
-		path("search/", views.search, name = "search")
+		path("search/", views.search, name = "search"),
+		path("query/", views.query, name = "query")
 ]

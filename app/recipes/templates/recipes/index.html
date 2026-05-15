@@ -8,30 +8,29 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 		<link rel="stylesheet" href="{% static 'recipes/style.css' %}" />
-		<script src="https://kit.fontawesome.com/4b01eb49dd.js" crossorigin="anonymous"></script>
 	</head>
 	<body class="d-flex flex-column min-vh-100">
 		{% include 'recipes/navbar.html' %}
 		<div class="container pt-2 pb-4">
 		{% if recs %}
 			{% for rec in recs %}
-		<section class="py-2">
-			<div class="d-flex align-items-center">
-				<h3 class="me-2 p-2">{{ rec.category|upper }}</h3>
-				<div class="flex-grow-1 border-bottom border-primary border-5"></div>
-			</div>
+			<section class="py-2">
+				<div class="d-flex align-items-center">
+					<h3 class="me-2 p-2">{{ rec.category|upper }}</h3>
+					<div class="flex-grow-1 border-bottom border-primary border-5"></div>
+				</div>
 
-			{% include 'recipes/recipe-display.html' with recipes=rec.list %}
-			<a href="{{ rec.url }}"">
-				<button type="button" class="btn btn-outline-primary btn-lg mt-3 px-4 py-2" >See More</button>
-			</a>
-		</section>
-		{% endfor %}
-			{% else %}
+				{% include 'recipes/recipe-display.html' with recipes=rec.list %}
+				<a href="{{ rec.url }}"">
+					<button type="button" class="btn btn-outline-primary btn-lg mt-3 px-4 py-2" >See More</button>
+				</a>
+			</section>
+			{% endfor %}
+		{% else %}
 			<p>No recipes are available.</p>
-			{% endif %}
+		{% endif %}
 		</div>
 		{% include 'recipes/search-section.html' %}
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+	{% include "recipes/scripts.html" %}
 	</body>
 </html>
