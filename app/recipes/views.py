@@ -132,18 +132,18 @@ def query(request):
 	recipe_list = Recipe.objects.all()
 
 	query = Q()
-	
-	name = request.GET.get('name')
-	if name:
-		query &= Q(name__icontains=name)
 
-	category = request.GET.get('category')
-	if category:
-		query &= Q(category=category)
+
 	
-	keywords = request.GET.get('keywords')
-	if keywords:
-		query &= Q(keywords__icontains=keywords)
+	filter_col = request.POST.get('filter_col')
+	filter_val = request.POST.get('filter_val')
+
+	print(filter_col, filter_val)
+
+	if filter_col == 'keywords':
+		query &= Q(keywords__icontains=filter_val)
+	elif filter_col == 'category':
+		query &= Q(category=filter_val)
 
 	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
 

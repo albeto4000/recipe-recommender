@@ -7,7 +7,7 @@
 			<!-- Filter Sidebar -->
 			<div class="d-flex flex-column flex-shrink-0 p-3">
 				<h3>FILTER RECIPES</h3>
-				<form action="{% url 'recipes:browse' %}" role="search" method="get">
+				<form action="{% url 'recipes:browse' %}" role="search" method="post">
 					{% csrf_token %}
 					<div class="d-flex pt-2 pb-3 form-group filter-form-input">
 						<input class="form-control me-2" type="search" name="name" aria-label="Search"/>
@@ -49,13 +49,14 @@
 					var filter_col = $(this).children().first().attr('name');
 					var filter_val = $(this).children().first().attr('value');
 
-					console.log(filter_col);
-					console.log(filter_val);
-
 					$.ajax({
 						url: "/recipes/query/",
 						type: "POST",
-						data: {filter_col: filter_val},
+						data: {
+							'csrfmiddlewaretoken': '{{ csrf_token }}',
+							'filter_col': filter_col,
+							'filter_val': filter_val
+						},
 						success: function(response){
 							console.log(response);
 							$("#recipe-view").parent().html(response);
