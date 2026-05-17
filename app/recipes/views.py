@@ -8,6 +8,7 @@ from django.utils.http import urlencode
 from django.core import serializers
 
 import re
+import json
 
 from .models import Recipe, Rating
 
@@ -133,21 +134,15 @@ def query(request):
 
 	query = Q()
 
+	res = json.loads(request.body)
 
-	
-	filter_col = request.POST.get('filter_col')
-	filter_val = request.POST.get('filter_val')
-
-	print(filter_col, filter_val)
-
-	if filter_col == 'keywords':
-		query &= Q(keywords__icontains=filter_val)
-	elif filter_col == 'category':
-		query &= Q(category=filter_val)
+	for filter_col, filter_val in zip(res['filter_col'], res['filter_val']):
+		if filter_col == 'keywords':
+			query &= Q(keywords__icontains=filter_val)
+		elif filter_col == 'category':
+			query &= Q(category=filter_val)
 
 	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
-
-	#data = list(recipe_list.values('id', 'images', 'name', 'aggregated_rating', 'review_count', 'minutes'))
 
 	paginator = Paginator(recipe_list, 12)
 
@@ -156,5 +151,6 @@ def query(request):
 
 	if request.headers.get('x-requested-with') == 'XMLHttpRequest':
 		return render(request, 'recipes/paginated-recipes.html', {
-			'page_obj': page_obj
+			'page_obj': page_obj,
+			'filters_selected': res['filter_val']
 		})

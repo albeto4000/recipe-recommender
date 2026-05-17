@@ -44,35 +44,35 @@
 {% block scripts %}
 <script>
 		$(document).ready(function(){
-			$(document).on('mousedown', '.form-check', function(){
-				if(!$(this).children().first().prop('checked')){
-					var filter_col = $(this).children().first().attr('name');
-					var filter_val = $(this).children().first().attr('value');
+			$(document).on('change', '.form-check', function(){
+				var filter_cols = [];
+				var filter_vals = [];
 
-					$.ajax({
-						url: "/recipes/query/",
-						type: "POST",
-						data: {
-							'csrfmiddlewaretoken': '{{ csrf_token }}',
-							'filter_col': filter_col,
-							'filter_val': filter_val
-						},
-						success: function(response){
-							console.log(response);
-							$("#recipe-view").parent().html(response);
-						}
-					});
-				}
+				$('.form-check').each(function(){
+					if($(this).children().first().prop('checked')){
+						filter_cols.push($(this).children().first().attr('name'));
+						filter_vals.push($(this).children().first().attr('value'));
+					}
+				});
+
+				$.ajax({
+					url: "/recipes/query/",
+					type: "POST",
+					headers: {
+						'Content-Type': 'application/json',
+						'X-CSRFToken': '{{ csrf_token }}'
+					},
+					data: JSON.stringify({
+						'filter_col': filter_cols,
+						'filter_val': filter_vals
+					}),
+					success: function(response){
+						console.log(response);
+						$("#recipe-view").parent().html(response);
+					}
+				});
 				
 			});
-			// $.ajax({
-			// 	url: "/recipes/query/",
-			// 	type: "GET",
-			// 	data: {'keywords': 'spring'},
-			// 	success: function(response){
-			// 		console.log(response);
-			// 		$("#recipe-view").html(response);
-			// 	}
 		});
 	</script>
 {% endblock %}

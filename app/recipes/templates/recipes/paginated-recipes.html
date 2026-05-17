@@ -1,14 +1,13 @@
 <div class="container pt-2 pb-4" id="recipe-view">
-	{% if page_obj %}
+	
 	<section class="py-2">
 		<div class="d-flex align-items-center">
-			<h3 class="me-2 p-2">{{ page_obj.paginator.count }} RESULTS</h3>
+			<h3 class="me-2 p-2">{{ page_obj.paginator.count }} RESULTS{% if filters_selected %} MATCH KEYWORDS {% for filter in filters_selected %}{{ filter|upper }} {% endfor %}{% endif %}</h3>
 		</div>
+		{% if page_obj %}
 		{% include 'recipes/recipe-display.html' with recipes=page_obj %}
+		{% endif%}
 	</section>
-	{% else %}
-	<div>Loading recipes</div>
-	{% endif %}
 	
 	<!-- Pagination -->
 	<div class="pagination d-flex my-4 justify-content-center text-center">
