@@ -97,23 +97,7 @@ def detail(request, recipe_id):
 
 
 def search(request):
-	recipe_list = Recipe.objects.all()
-
-	query = Q()
-	
-	name = request.GET.get('name')
-	if name:
-		query &= Q(name__icontains=name)
-
-	category = request.GET.get('category')
-	if category:
-		query &= Q(category=category)
-
-	keywords = request.GET.get('keywords')
-	if keywords:
-		query &= Q(keywords__icontains=keywords)
-
-	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
+	recipe_list = Recipe.objects.all().order_by('-review_count')
 
 	paginator = Paginator(recipe_list, 12)
 
@@ -141,16 +125,18 @@ def query(request):
 			query &= Q(keywords__icontains=filter_val)
 		elif filter_col == 'category':
 			query &= Q(category=filter_val)
+		elif filter_col == 'name':
+			query &= Q(name__icontains=filter_val)
 
 	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
 
 	paginator = Paginator(recipe_list, 12)
 
-	page_number = request.GET.get('page')
+	page_number = request.POST.get('page')
 	page_obj = paginator.get_page(page_number)
 
 	if request.headers.get('x-requested-with') == 'XMLHttpRequest':
 		return render(request, 'recipes/paginated-recipes.html', {
 			'page_obj': page_obj,
 			'filters_selected': res['filter_val']
-		})
+	})

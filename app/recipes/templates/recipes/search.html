@@ -7,11 +7,11 @@
 			<!-- Filter Sidebar -->
 			<div class="d-flex flex-column flex-shrink-0 p-3">
 				<h3>FILTER RECIPES</h3>
-				<form action="{% url 'recipes:browse' %}" role="search" method="post">
+				<form role="search" method="post">
 					{% csrf_token %}
 					<div class="d-flex pt-2 pb-3 form-group filter-form-input">
-						<input class="form-control me-2" type="search" name="name" aria-label="Search"/>
-						<button class="btn btn-outline-success" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+						<input id="search-input" class="form-control me-2" type="search" aria-label="Search"/>
+						<button id="search-btn" class="btn btn-outline-success"><i class="fa-solid fa-magnifying-glass"></i></button>
 					</div>
 					
 					<!--Season Dropdown-->
@@ -43,36 +43,58 @@
 
 {% block scripts %}
 <script>
-		$(document).ready(function(){
-			$(document).on('change', '.form-check', function(){
-				var filter_cols = [];
-				var filter_vals = [];
+	var search_term = "";
 
-				$('.form-check').each(function(){
-					if($(this).children().first().prop('checked')){
-						filter_cols.push($(this).children().first().attr('name'));
-						filter_vals.push($(this).children().first().attr('value'));
-					}
-				});
+	function query_results(search){
+		var filter_cols = [];
+		var filter_vals = [];
 
-				$.ajax({
-					url: "/recipes/query/",
-					type: "POST",
-					headers: {
-						'Content-Type': 'application/json',
-						'X-CSRFToken': '{{ csrf_token }}'
-					},
-					data: JSON.stringify({
-						'filter_col': filter_cols,
-						'filter_val': filter_vals
-					}),
-					success: function(response){
-						console.log(response);
-						$("#recipe-view").parent().html(response);
-					}
-				});
-				
-			});
+		if(typeof search !== 'undefined' && $('#search-input').val() == search_term && search_term != ""){
+			filter_cols.push('name');
+			filter_vals.push(search);
+		}
+
+		$('.form-check').each(function(){
+			if($(this).children().first().prop('checked')){
+				filter_cols.push($(this).children().first().attr('name'));
+				filter_vals.push($(this).children().first().attr('value'));
+			}
 		});
-	</script>
+
+		$.ajax({
+			url: "/recipes/query/",
+			type: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRFToken': '{{ csrf_token }}'
+			},
+			data: JSON.stringify({
+				'filter_col': filter_cols,
+				'filter_val': filter_vals,
+				'page': 1
+			}),
+			success: function(response){
+				console.log(response);
+				$("#recipe-view").parent().html(response);
+			}
+		});
+	}
+
+	$(document).ready(function(){
+		$(document).on('change', '.form-check', function(){
+			query_results(search_term);
+		});
+
+		$(document).on('submit', 'form', function(event){
+			event.preventDefault();
+			search_term = $('#search-input').val()
+			query_results(search_term);
+		});
+
+		$(document).on('search', function(){
+			search_term = $('#search-input').val()
+			query_results(search_term);
+		});
+	});
+</script>
 {% endblock %}
