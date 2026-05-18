@@ -104,11 +104,47 @@ def search(request):
 	page_number = request.GET.get('page')
 	page_obj = paginator.get_page(page_number)
 	
-	season_filter = {'category': 'season', 'choices': ['spring', 'summer', 'fall', 'winter'], 'filters': 'keywords'}
-	protein_filter = {'category': 'protein', 'choices': ['beef', 'chicken', 'pork', 'turkey'], 'filters': 'keywords'}
+	season_filter = {
+		'category': 'season', 
+		'choices': [
+			('spring', 'spring'), 
+			('summer', 'summer'), 
+			('fall', 'fall'), 
+			('winter', 'winter')], 
+		'filters': 'keywords'
+	}
+
+	protein_filter = {
+		'category': 'protein', 
+		'choices': [
+			('beef', 'beef'), 
+			('chicken', 'chicken'), 
+			('pork', 'pork'), 
+			('turkey', 'turkey')
+		], 
+		'filters': 'keywords'
+	}
+
+	diet_filter = {
+		'category': 'Dietary Need',
+		'choices': [
+			('egg free', 'egg free'),
+			('kosher', 'kosher'),
+			('lactose free', 'lactose free'),
+			('low carbs', 'very low carbs'),
+			('low cholesterol', 'low cholesterol'),
+			('low protein', 'low protein'),
+			('vegan', 'vegan')
+		],
+		'filters': 'keywords'
+	}
+
+#* Dairy Free Foods
+#* Kid Friendly
+#* Toddler Friendly
 
 	return render(request, 'recipes/search.html', {
-		'filters': [season_filter, protein_filter],
+		'filters': [season_filter, protein_filter, diet_filter],
 		'page_obj': page_obj
 	})
 

@@ -21,11 +21,11 @@
 							By {{ filter.category|title }}
 						</button>
 						<ul class="dropdown-menu shadow p-2 filter-form-input" aria-labelledby="{{ filter.category }}-dropdown">
-							{% for choice in filter.choices %}
+							{% for choice_label, choice_value in filter.choices %}
 							<li>
 								<div class="form-group form-check mx-2 my-1">
-									<input class="form-check-input border border-dark border-1" type="checkbox" name="{{ filter.filters }}" value="{{ choice }}" id="{{ filter.category }}-{{ choice }}-check">
-									<label class="form-check-label" for="{{ filter.category }}-{{ choice }}-check">{{ choice|title }} Recipes</label>
+									<input class="form-check-input border border-dark border-1" type="checkbox" name="{{ filter.filters }}" value="{{ choice_value }}" id="{{ filter.category|cut:' ' }}-{{ choice_value|cut:' ' }}-check">
+									<label class="form-check-label" for="{{ filter.category|cut:' ' }}-{{ choice_value|cut:' ' }}-check">{{ choice_label|title }} Recipes</label>
 								</div>
 							</li>
 						{% endfor %}

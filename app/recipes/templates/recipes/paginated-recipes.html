@@ -2,7 +2,15 @@
 	
 	<section class="py-2">
 		<div class="d-flex align-items-center">
-			<h3 class="me-2 p-2">{{ page_obj.paginator.count }} RESULTS{% if filters_selected %} MATCH KEYWORDS {% for filter in filters_selected %}{{ filter|upper }} {% endfor %}{% endif %}</h3>
+			<h3 class="me-2 p-2">
+				{{ page_obj.paginator.count }} RESULTS
+				{% if filters_selected %}<!-- Displays any filters applied to the recipe list -->
+					MATCH KEYWORD{% if filters_selected|length > 1 %}S{% endif %} 
+					{% for filter in filters_selected %}<!---->
+						"{{ filter|upper }}"{% if not forloop.last %}, {% endif %}<!-- -->
+					{% endfor %}
+				{% endif %}
+			</h3>
 		</div>
 		{% if page_obj %}
 		{% include 'recipes/recipe-display.html' with recipes=page_obj %}
