@@ -48,6 +48,7 @@
 	function query_results(search){
 		var filter_cols = [];
 		var filter_vals = [];
+		var filter_labels = [];
 
 		if(typeof search !== 'undefined' && $('#search-input').val() == search_term && search_term != ""){
 			filter_cols.push('name');
@@ -58,6 +59,7 @@
 			if($(this).children().first().prop('checked')){
 				filter_cols.push($(this).children().first().attr('name'));
 				filter_vals.push($(this).children().first().attr('value'));
+				filter_labels.push($(this).children().last().text().replace(' Recipes', ''));
 			}
 		});
 
@@ -71,6 +73,7 @@
 			data: JSON.stringify({
 				'filter_col': filter_cols,
 				'filter_val': filter_vals,
+				'filter_label': filter_labels,
 				'page': 1
 			}),
 			success: function(response){

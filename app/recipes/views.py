@@ -114,13 +114,18 @@ def search(request):
 		'filters': 'keywords'
 	}
 
+	seafood = ['bass', 'catfish', 'crab', 'crawfish', 'fish halibut', 
+	'lobster', 'mahi mahi', 'mussels', 'no shell fish', 'octopus', 
+	'oysters', 'squid', 'tilapia', 'trout', 'tuna', 'whitefish']
+
 	protein_filter = {
 		'category': 'protein', 
 		'choices': [
 			('beef', 'beef'), 
 			('chicken', 'chicken'), 
 			('pork', 'pork'), 
-			('turkey', 'turkey')
+			('turkey', 'turkey'),
+			('seafood', '|'.join(seafood))
 		], 
 		'filters': 'keywords'
 	}
@@ -130,7 +135,7 @@ def search(request):
 		'choices': [
 			('egg free', 'egg free'),
 			('kosher', 'kosher'),
-			('lactose free', 'lactose free'),
+			('lactose free', 'dairy free foods|lactose free'),
 			('low carbs', 'very low carbs'),
 			('low cholesterol', 'low cholesterol'),
 			('low protein', 'low protein'),
@@ -158,7 +163,10 @@ def query(request):
 
 	for filter_col, filter_val in zip(res['filter_col'], res['filter_val']):
 		if filter_col == 'keywords':
-			query &= Q(keywords__icontains=filter_val)
+			keyword_query = Q()
+			for val in filter_val.split('|'):
+				keyword_query |= Q(keywords__icontains=val)
+			query &= keyword_query
 		elif filter_col == 'category':
 			query &= Q(category=filter_val)
 		elif filter_col == 'name':
@@ -174,5 +182,5 @@ def query(request):
 	if request.headers.get('x-requested-with') == 'XMLHttpRequest':
 		return render(request, 'recipes/paginated-recipes.html', {
 			'page_obj': page_obj,
-			'filters_selected': res['filter_val']
+			'filters_selected': res['filter_label']
 	})
