@@ -10,6 +10,9 @@ from django.core import serializers
 import re
 import json
 
+from functools import reduce
+from operator import or_
+
 from .models import Recipe, Rating
 
 def index(request):
@@ -123,7 +126,7 @@ def search(request):
 		'choices': [
 			('beef', 'beef'), 
 			('chicken', 'chicken'), 
-			('pork', 'pork'), 
+			('pork', 'pork|ham'), 
 			('turkey', 'turkey'),
 			('seafood', '|'.join(seafood))
 		], 
@@ -135,6 +138,8 @@ def search(request):
 		'choices': [
 			('egg free', 'egg free'),
 			('kosher', 'kosher'),
+			('healthy', 'healthy'),
+			('high fiber', 'high fiber'),
 			('lactose free', 'dairy free foods|lactose free'),
 			('low carbs', 'very low carbs'),
 			('low cholesterol', 'low cholesterol'),
@@ -144,12 +149,23 @@ def search(request):
 		'filters': 'keywords'
 	}
 
+	cook_time_filter = {
+		'category': 'Cook Time',
+		'choices': [
+			('< 15 Mins', '< 15 Mins'),
+			('< 30 Mins', '< 30 Mins'),
+			('< 60 Mins', '< 60 Mins'),
+			('< 4 Hours', '< 4 Hours')
+		],
+		'filters': 'keywords'
+	}
+
 #* Dairy Free Foods
 #* Kid Friendly
 #* Toddler Friendly
 
 	return render(request, 'recipes/search.html', {
-		'filters': [season_filter, protein_filter, diet_filter],
+		'filters': [season_filter, protein_filter, diet_filter, cook_time_filter],
 		'page_obj': page_obj
 	})
 
@@ -163,12 +179,14 @@ def query(request):
 
 	for filter_col, filter_val in zip(res['filter_col'], res['filter_val']):
 		if filter_col == 'keywords':
-			keyword_query = Q()
-			for val in filter_val.split('|'):
-				keyword_query |= Q(keywords__icontains=val)
+			values = filter_val.split('|')
+			keyword_query = reduce(
+				or_,
+				(Q(keywords__icontains = v) for v in values)
+			)
 			query &= keyword_query
 		elif filter_col == 'category':
-			query &= Q(category=filter_val)
+			query &= Q(category__in=filter_val)
 		elif filter_col == 'name':
 			query &= Q(name__icontains=filter_val)
 

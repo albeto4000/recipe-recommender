@@ -5,7 +5,7 @@
 {% block content %}
 <div class="d-flex">
 			<!-- Filter Sidebar -->
-			<div class="d-flex flex-column flex-shrink-0 p-3">
+			<div class="d-flex flex-column flex-shrink-0 p-3" id="filters-sidebar">
 				<h3>FILTER RECIPES</h3>
 				<form role="search" method="post">
 					{% csrf_token %}
@@ -34,6 +34,7 @@
 				{% endfor %}
 			</form>
 		</div>
+
 		<!--Page Content-->
 		<main class="flex-grow-1">
 			{% include 'recipes/paginated-recipes.html' %}
