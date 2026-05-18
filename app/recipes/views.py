@@ -160,7 +160,6 @@ def search(request):
 		'filters': 'keywords'
 	}
 
-#* Dairy Free Foods
 #* Kid Friendly
 #* Toddler Friendly
 
@@ -194,7 +193,8 @@ def query(request):
 
 	paginator = Paginator(recipe_list, 12)
 
-	page_number = request.POST.get('page')
+	page_number = res['page']
+	print(page_number)
 	page_obj = paginator.get_page(page_number)
 
 	if request.headers.get('x-requested-with') == 'XMLHttpRequest':

@@ -46,7 +46,7 @@
 <script>
 	var search_term = "";
 
-	function query_results(search){
+	function query_results(search, page){
 		var filter_cols = [];
 		var filter_vals = [];
 		var filter_labels = [];
@@ -75,29 +75,36 @@
 				'filter_col': filter_cols,
 				'filter_val': filter_vals,
 				'filter_label': filter_labels,
-				'page': 1
+				'page': page
 			}),
 			success: function(response){
-				console.log(response);
+				console.log('Success');
 				$("#recipe-view").parent().html(response);
+				$("html, body").animate({ scrollTop: 0 }, "fast");
 			}
 		});
 	}
 
 	$(document).ready(function(){
 		$(document).on('change', '.form-check', function(){
-			query_results(search_term);
+			query_results(search_term, 1);
 		});
 
 		$(document).on('submit', 'form', function(event){
 			event.preventDefault();
 			search_term = $('#search-input').val()
-			query_results(search_term);
+			query_results(search_term, 1);
 		});
 
 		$(document).on('search', function(){
 			search_term = $('#search-input').val()
-			query_results(search_term);
+			query_results(search_term, 1);
+		});
+
+		$(document).on('click', '.pagination a', function(event){
+			event.preventDefault();
+			console.log(Number($(this).attr('href').replace('?page=', '')));
+			query_results(search_term, $(this).attr('href').replace('?page=', ''));
 		});
 	});
 </script>
