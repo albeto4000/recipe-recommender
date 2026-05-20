@@ -20,7 +20,7 @@ class Command(BaseCommand):
 	#		parser.add_argument('csv_file', type=str)
 
 	def handle(self, *args, **options):
-		recipe_file_path = APP_DIR / 'data/recipes.csv'
+		recipe_file_path = APP_DIR / 'data/recipes_augmented.csv'
 		ratings_file_path = APP_DIR / 'data/reviews.csv'
 
 		#Import recipe data
@@ -42,7 +42,7 @@ class Command(BaseCommand):
 		)
 
 		#Handles any missing integer values
-		recipe_df.fillna(0, inplace = True);
+		recipe_df.update(recipe_df.select_dtypes(include='number').fillna(0));
 
 		ratings_df['DateSubmitted'] = pd.to_datetime(
 				ratings_df['DateSubmitted'],
@@ -117,6 +117,8 @@ class Command(BaseCommand):
 						servings=row.RecipeServings,
 						recipe_yield=row.RecipeYield,
 						instructions=row.RecipeInstructions,
+						ingredient_text=row.RecipeIngredientText,
+						ingredient_units=row.RecipeIngredientUnits 
 				)
 				for row in recipe_sample.itertuples(index=False)
 		]

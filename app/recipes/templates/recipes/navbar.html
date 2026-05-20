@@ -11,7 +11,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
+      <ul class="navbar-nav mr-auto">
         <li class="nav-item">
           <a class="nav-link {% if request.path == index %}active{% endif %}" aria-current="page" href="{% url 'recipes:index' %}">Home</a>
         </li>
@@ -22,6 +22,42 @@
           <a class="nav-link {% if request.path == search %}active{% endif %}" aria-current="page" href="{% url 'recipes:search' %}">Search</a>
         </li>
       </ul>
+      {% if user.is_authenticated %}
+          <div>Welcome, {{ user.username }}</div>
+      {% else %}
+          <button class="btn btn-primary ms-auto" data-bs-toggle="modal" data-bs-target="#login-modal">Login</button>
+      {% endif %}
+      
     </div>
   </div>
 </nav>
+
+<!-- Login Modal -->
+ <div class="modal fade" id="login-modal" tabindex="-1" aria-labelledby="login-modal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5 mx-auto">LOG IN</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0;"></button>
+      </div>
+      <form action="{% url 'recipes:login' %}" method="POST">
+      <div class="modal-body">
+        
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="email" class="col-form-label">EMAIL</label>
+            <input id="email" type="email" class="form-control" name="email">
+          </div>
+          <div class="mb-3">
+            <label for="password" class="col-form-label">PASSWORD</label>
+            <input id="password" type="password" class="form-control" name="password">
+          </div>
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Login</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>

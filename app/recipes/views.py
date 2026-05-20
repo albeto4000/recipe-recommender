@@ -6,9 +6,11 @@ from django.views import generic
 from django.core.paginator import Paginator
 from django.utils.http import urlencode
 from django.core import serializers
+from django.contrib.auth import authenticate, login, get_user_model
 
 import re
 import json
+import ast
 
 from functools import reduce
 from operator import or_
@@ -74,12 +76,13 @@ def browse(request):
 
 def detail(request, recipe_id):
 	recipe = get_object_or_404(Recipe, pk = recipe_id)
-	ingredients = re.sub(r'(c\()|\)|"', '', recipe.ingredients).split(', ')
-	#recipes.ingredients.lstrip('[').rstrip(']').split(', ')
-	ing_amounts = re.sub(r'(c\()|\)|"', '', recipe.ingredient_quantities).split(', ')
-	#ing_amounts = recipes.ingredient_quantities.split()
-	steps = re.sub(r'(c\()|\)|"', '', recipe.instructions).split(', ')
-	#
+
+	if recipe.ingredient_text != "['error']":
+		ingredients = ast.literal_eval(recipe.ingredient_text)
+	else:
+		ingredients = re.split(r'",\s*"', recipe.ingredients[3:-2])
+	ing_amounts = recipe.ingredient_quantities[2:-1].replace('\"', '').split(', ')
+	steps = re.split(r'",\s*"', recipe.instructions[3:-2])
     
 	minutes = re.sub(r'\D', '', recipe.minutes)
 	nutrition_labels = ['Calories', 'Total Fat', 'Saturated Fat', 'Cholesterol', 'Sodium', 'Total Carbohydrate', 'Dietary Fiber', 'Sugars', 'Protein']
@@ -202,3 +205,11 @@ def query(request):
 			'page_obj': page_obj,
 			'filters_selected': res['filter_label']
 	})
+
+def login(request):
+	email = request.POST['email']
+	password = request.POST['password']
+
+	User = get_user_model()
+
+	pass

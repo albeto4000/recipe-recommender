@@ -30,6 +30,9 @@ class Recipe(models.Model):
 	servings = models.IntegerField(default = 0)
 	recipe_yield = models.CharField(max_length = 200)
 	instructions = models.TextField()
+	ingredient_text = models.TextField()
+	ingredient_units = models.TextField()
+
 	
 	def __str__(self):
 		return self.name

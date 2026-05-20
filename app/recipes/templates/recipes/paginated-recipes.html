@@ -2,7 +2,7 @@
 	
 	<section class="py-2">
 		<div class="d-flex align-items-center">
-			<h3 class="me-2 p-2">
+			<h3 class="me-2 px-2 py-1">
 				{{ page_obj.paginator.count }} RESULTS
 				{% if filters_selected %}<!-- Displays any filters applied to the recipe list -->
 					MATCH KEYWORD{% if filters_selected|length > 1 %}S{% endif %} 
@@ -12,6 +12,7 @@
 				{% endif %}
 			</h3>
 		</div>
+		<div class="me-2 px-2">Showing items {{ page_obj.start_index }}–{{ page_obj.end_index }}</div>
 		{% if page_obj %}
 		{% include 'recipes/recipe-display.html' with recipes=page_obj %}
 		{% endif%}

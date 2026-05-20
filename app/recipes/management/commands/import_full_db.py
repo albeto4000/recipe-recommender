@@ -20,7 +20,7 @@ class Command(BaseCommand):
 	#		parser.add_argument('csv_file', type=str)
 
 	def handle(self, *args, **options):
-		recipe_file_path = APP_DIR / 'data/recipes.csv'
+		recipe_file_path = APP_DIR / 'data/recipes_augmented.csv'
 		ratings_file_path = APP_DIR / 'data/reviews.csv'
 
 		#Import recipe data
@@ -114,6 +114,8 @@ class Command(BaseCommand):
 						servings=row.RecipeServings,
 						recipe_yield=row.RecipeYield,
 						instructions=row.RecipeInstructions,
+						ingredient_text=row.RecipeIngredientText,
+						ingredient_units=row.RecipeIngredientUnits 
 				)
 				for row in recipe_df.itertuples(index=False)
 		]

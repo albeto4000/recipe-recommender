@@ -1,44 +1,52 @@
 {% extends "recipes/base.html" %}
 {% load display_stars %}
 
-{% block title %}{{recipe.name|title}} Recipe{% endblock %}
+{% block title %}{{ recipe.name|safe }} Recipe{% endblock %}
 
 {% block content %}
 <div class="container pt-2 pb-4">
-	<h1>{{ recipe.name|title|safe }}</h1>
+	<h1>{{ recipe.name|safe }}</h1>
 	<div id="rating-input"></div>
 	<hr />
 	<h5>Submitted by {{ recipe.contributor|title }}</h5>
 	<div class="fst-italic">"{{ recipe.description|capfirst|safe }}"</div>
 	<br />
-		{% if recipe.images != "character(0" %}
+	{% if recipe.images != "character(0" %}
 		<img id="recipe-img" src={{ recipe.images }} class="img-rounded" />
-		{% else %}
+	{% else %}
 		<img id="recipe-img" src = 'https://upload.wikimedia.org/wikipedia/en/3/34/Food-com-logo.png' class="img-rounded"/>
-		{% endif %}
-		<div class = "mt-4 mb-2" id="recipe-info">
-			<div class="my-2"><i class="fa-regular fa-clock"></i> Ready in {{ minutes }} minutes</div>
-			<div class="my-2"><i class="fa-solid fa-apple-whole"></i> Ingredients: {{ n_ingredients }}</div>
-			<div class="my-2"><i class="fa-solid fa-bowl-food"></i> Servings: {{ recipe.servings }}</div>
-			<div class="my-2 link-primary" id="show-nutrition" role="button" data-bs-toggle="modal" data-bs-target="#nutrition-modal">Nutrition Information</div>
-		</div>
-		<hr />
-		<h2>Ingredients</h2>
-		<ul>
-			{% for quantity, ingredient in ingredients %}
-				{% if quantity != 'NA' %}
-					<li>{{ quantity }} {{ ingredient|title }}</li>
+	{% endif %}
+	<div class = "mt-4 mb-2" id="recipe-info">
+		<div class="my-2"><i class="fa-regular fa-clock"></i> Ready in {{ minutes }} minutes</div>
+		<div class="my-2"><i class="fa-solid fa-apple-whole"></i> Ingredients: {{ n_ingredients }}</div>
+		<div class="my-2"><i class="fa-solid fa-bowl-food"></i> Servings: {{ recipe.servings }}</div>
+		<div class="my-2 link-primary" id="show-nutrition" role="button" data-bs-toggle="modal" data-bs-target="#nutrition-modal">Nutrition Information</div>
+	</div>
+	<hr />
+	<h2>Ingredients</h2>
+	<ul>
+		{% for quantity, ingredient in ingredients %}
+			{% if quantity != 'NA' %}
+				{% if "-" in quantity %}
+					<li>{{ quantity|cut:" " }} {{ ingredient|title }}</li>
 				{% else %}
-					<li>{{ ingredient|title }}</li>
+					<li>{{ quantity }} {{ ingredient|title }}</li>
 				{% endif %}
-			{% endfor %}
-		</ul>
-		<h2>Steps</h2>
-		<ol>
-			{% for step in steps %}
+			{% else %}
+				<li>{{ ingredient|title }}</li>
+			{% endif %}
+		{% endfor %}
+	</ul>
+	<h2>Steps</h2>
+	<ol>
+		{% for step in steps %}
+			{% if ":" in step %}
+			<div>{{ step|capfirst }}</div>
+			{% else %}
 			<li>{{ step|capfirst }}</li>
-			{% endfor %}
-		</ol>
+			{% endif %}
+		{% endfor %}
+	</ol>
 		
 	{% for rating in recipe.rating_set.all %}
 		{% if forloop.counter <= 20 %}
