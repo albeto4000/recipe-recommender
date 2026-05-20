@@ -17,11 +17,14 @@ logging.basicConfig(level=logging.INFO)
 
 def main():
 
+    # Adding Path to data (!!Change to your Local Path!!!)
+    data_path = '/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/'
+
     # Loading the Train and Test Item Collection data files to be used to run models
     print("Loading Training Data and Test Item Data....")
-    train_data = Dataset.load('/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/cleaned_data/split_data/train_data')
+    train_data = Dataset.load(data_path + 'cleaned_data/split_data/train_data')
 
-    test_item_data = ItemListCollection.load_parquet('/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/cleaned_data/split_data/test_item_data.parquet')
+    test_item_data = ItemListCollection.load_parquet(data_path + 'cleaned_data/split_data/test_item_data.parquet')
     print("Data has successfully been loaded!")
 
 
@@ -45,7 +48,7 @@ def main():
     #Grabbing the number of models so that it can be good for logging
     total_models = len(models)
 
-    #Creating the model directory to save them
+    #Creating the model directory to save them (!!Change to your Local Path!!!)
     model_dir = "/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/models/"
 
     for i, (name, scorer) in enumerate(models.items(), 1):
@@ -72,12 +75,12 @@ def main():
 
             print(f"Status: Generating 20-item Recommendations for {name} model...")
             recs = batch.recommend(pipe, test_item_data)
-            recs.save_parquet(f'/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/recs/{name.lower()}_recs.parquet')
+            recs.save_parquet(data_path + f'recs/{name.lower()}_recs.parquet')
 
             print(f"Status: Generating Predictions...")
 
             preds = batch.predict(pipe, test_item_data)
-            preds.save_parquet(f'/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/preds/{name.lower()}_preds.parquet')
+            preds.save_parquet(data_path + f'preds/{name.lower()}_preds.parquet')
             
             print(f"Finished Computation on {name} Model!")
 
@@ -100,7 +103,7 @@ def main():
             # Recommend (R) 20 items for top-N accuracy (nDCG/RBP)
             print(f"Status: Generating 20-item Recommendations for {name} model...")
             recs = batch.recommend(pipe, test_item_data)
-            recs.save_parquet(f'/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/recs/{name.lower()}_recs.parquet')
+            recs.save_parquet(data_path + f'recs/{name.lower()}_recs.parquet')
         
             print(f"Finished Computation on {name} Model!")
 

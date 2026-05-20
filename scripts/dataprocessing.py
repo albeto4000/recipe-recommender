@@ -9,9 +9,13 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
+
+    # Adding the data path (!! Change to your Local Path!!)
+    data_path = '/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/'
+
     #Loading the Movie Lens dataset using the buidlt in load_movielens function
     print("Loading Recipe data...")
-    dataset = Dataset.load("/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/cleaned_data/recipe_dataset")
+    dataset = Dataset.load(data_path + "cleaned_data/recipe_dataset")
 
     # Performing a Global Temporal Split with 15% reserved for testing
     print("Splitting data (80/20%  train test split)...")
@@ -25,10 +29,10 @@ def main():
     print("Saving split data...")
     
     # Save the training dataset
-    train_data.save("/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/cleaned_data/split_data/train_data")
+    train_data.save(data_path + "cleaned_data/split_data/train_data")
     
     # Save the test item collection 
-    test_item_data.save_parquet("/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/cleaned_data/split_data/test_item_data.parquet")
+    test_item_data.save_parquet(data_path + "cleaned_data/split_data/test_item_data.parquet")
     
     print("Data split successfully! Files saved: train_data.parquet, test_item_data.parquet")
 
