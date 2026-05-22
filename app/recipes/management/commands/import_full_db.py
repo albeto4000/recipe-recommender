@@ -150,5 +150,5 @@ class Command(BaseCommand):
 				ignore_conflicts=True,
 				batch_size=5000,
 		)
-
+	
 		self.stdout.write(self.style.SUCCESS(datetime.now().strftime('%H:%M:%S') + 'Successfully imported ratings data'))

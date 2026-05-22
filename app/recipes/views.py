@@ -206,10 +206,15 @@ def query(request):
 			'filters_selected': res['filter_label']
 	})
 
-def login(request):
-	email = request.POST['email']
-	password = request.POST['password']
+# def login(request):
+# 	email = request.POST['email']
+# 	password = request.POST['password']
 
-	User = get_user_model()
+# 	User = get_user_model()
 
-	pass
+# 	pass
+
+from django.contrib.auth.forms import AuthenticationForm
+
+def login_modal_form(request):
+    return {'login_form': AuthenticationForm()}
