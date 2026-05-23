@@ -6,6 +6,7 @@
 <div class="container pt-2 pb-4">
 {% if recs %}
 	{% for rec in recs %}
+	{% if rec.list %}
 	<section class="py-2">
 		<div class="d-flex align-items-center">
 			<h3 class="me-2 p-2">{{ rec.category|upper }}</h3>
@@ -17,6 +18,7 @@
 			<button type="button" class="btn btn-outline-primary btn-lg mt-3 px-4 py-2" >See More</button>
 		</a>
 	</section>
+	{% endif %}
 	{% endfor %}
 {% else %}
 	<p>No recipes are available.</p>
