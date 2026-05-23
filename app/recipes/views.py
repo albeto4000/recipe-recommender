@@ -11,10 +11,16 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import localdate
 from django.db.models import F, Avg
+from django.conf import settings
 
 import re
 import json
 import ast
+import pickle
+import os
+
+import lenskit
+from lenskit import batch, recommend
 
 from functools import reduce
 from operator import or_
@@ -28,39 +34,59 @@ def index(request):
 	#with parameters to filter the results
 	base_url = reverse("recipes:browse")
 
+	rec_list = []
+	
+	# pop_order_list = Recipe.objects.order_by("-review_count")[:8]
+	
+	# pop_order_link = base_url
+	
+	# pop_order_rec = {
+	# 	'category': pop_order_category, 
+	# 	'list': pop_order_list, 
+	# 	'url': pop_order_link
+	# }
+
 	#The first section recommends popular recipes, or recipes with the most ratings
-	pop_rec_category = "popular recipes"
+	#Reads the pop_scorer pipe from the models directory
+	with open(os.path.join(settings.BASE_DIR, '../models/popular_pipeline.pkl'), 'rb') as fh:
+		pop_pipe = pickle.load(fh)
+
 	#Gets the IDs of the 8 recipes with the most ratings
-	pop_rec_list = Recipe.objects.order_by("-review_count")[:8]
+	pop_rec_category = "popular recipes"
+	#Gets the item IDs of the top 8 models recommended by the pop_scorer
+	#Pop_scorer does not need user_id to make recommendations
+	pop_rec_nums = recommend(pop_pipe, None, n=8).to_df()['item_id'].values
+	#Fetches the recipes corresponding to those 8 IDs
+	pop_rec_list = Recipe.objects.filter(id__in=pop_rec_nums)
 	#Browse shows all recipes by popularity as its default, so I won't encode any arguments in the url
 	pop_rec_link = base_url
 	#Creates a dictionary to represent the pop_recs section
 	#The index view takes a list of dictionaries like this and formats them into HTML using the recipe-display.html template
-	pop_rec = {'category': pop_rec_category, 'list': pop_rec_list, 'url': pop_rec_link}
+	rec_list.append({
+		'category': pop_rec_category,
+		'list': pop_rec_list,
+		'url': pop_rec_link
+	})
 
-	#Creates a recommendation section called "pizza party" that recommends popular recipes with "pizza" in the name
-	pizza_category = "pizza party"
-	pizza_list = Recipe.objects.filter(name__icontains='pizza').order_by("-review_count")[:8]
-	#I'll use urlencode to include a GET parameter in the url. This will show up as /recipes/browse?name=pizza
-	pizza_link = f"{base_url}?{urlencode({'name': 'pizza'})}"
-	pizza_rec = {'category': pizza_category, 'list': pizza_list, 'url': pizza_link}
+	if request.user.is_authenticated:
+		models = ['bias', 'explicit_mf', 'implicit_mf', 'item_item_implicit', 'item_item', 'slim', 'user_user']
+		user_id = 1634
 
-	#Creates a recommendation section using the category 'Weeknight'
-	weeknight_category = "tonight's dinner"
-	weeknight_list = Recipe.objects.filter(category='Weeknight').order_by("-review_count")[:8]
-	weeknight_link = f"{base_url}?{urlencode({'category': 'Weeknight'})}"
-	weeknight_rec = {'category': weeknight_category, 'list': weeknight_list, 'url': weeknight_link}
-
-	#Creates a recommendation section using the keyword 'Spring'
-	spring_category = "flavors of spring"
-	spring_list = Recipe.objects.filter(keywords__icontains='spring').order_by("-review_count")[:8]
-	spring_link = f"{base_url}?{urlencode({'keywords': 'spring'})}"
-	spring_rec = {'category': spring_category, 'list': spring_list, 'url': spring_link}
+		for model in models:
+			with open(os.path.join(settings.BASE_DIR, '../models/' + model + '_pipeline.pkl'), 'rb') as fh:
+				rec_pipe = pickle.load(fh)
+			recs = recommend(rec_pipe, user_id, n=8).to_df()['item_id'].values
+			pipe_rec_list = Recipe.objects.filter(id__in=recs)
+			rec_list.append({
+				'category': model,
+				'list': pipe_rec_list,
+				'url': base_url
+			})
 
 	#Render displays a template with parameters included as a dict
 	#The index view takes parameter 'recs', a list of dictionaries that represent the recommendation sections
 	return render(request, 'recipes/index.html', {
-		'recs': [pop_rec, pizza_rec, weeknight_rec, spring_rec]
+		'recs': rec_list
 	})
 
 
@@ -348,6 +374,9 @@ def submit_rating(request):
 	#Attempts to find the recipe iwth the given ID. Returns 404 error otherwise
 	recipe = get_object_or_404(Recipe, pk=recipe_id)
 
+	print(recipe.aggregated_rating)
+	print(round(Rating.objects.filter(recipe=recipe).aggregate(Avg('rating'))['rating__avg'] * 2) / 2)
+
 	#rating>0 means the user has clicked a star to rate, not clicked the star of their current rating to remove it
 	if int(request.POST.get('rating')) != 0:
 		#Attempts to create a new rating, or updates the rating if it already exists
@@ -379,3 +408,7 @@ def submit_rating(request):
 
 	#Redirects to the detail page for the current recipe
 	return detail(request, recipe_id)
+
+@login_required
+def reviews(request):
+	return render(request, 'recipes/user_reviews.html')

@@ -194,12 +194,13 @@
 				},
 				success: function(response){
 					console.log("Success");
+					location.reload();
 				}
 			});
 			{% else %}
 				$('#login-modal').modal('show');
 			{% endif %}
-
+			
 			update_stars();
 		});
 
@@ -240,6 +241,7 @@
 				},
 				success: function(response){
 					console.log("Success");
+					location.reload();
 				}
 			});
 			{% else %}

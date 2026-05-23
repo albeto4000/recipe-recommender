@@ -10,5 +10,6 @@ urlpatterns = [
 		path("query/", views.query, name = "query"),
     	path('login/', views.login_view, name = "login"),
 		path('logout/', views.logout_view, name = "logout"),
-		path('rate/', views.submit_rating, name = "rate")
+		path('rate/', views.submit_rating, name = "rate"),
+		path('reviews/', views.reviews, name = "reviews")
 ]

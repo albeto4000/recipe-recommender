@@ -28,6 +28,7 @@
               Welcome, {{ user.username }}
             </button>
             <div class = "dropdown-menu" aria-labelledby = "navDropdown">
+              <a class="dropdown-item" href="{% url 'recipes:reviews' %}">View Ratings</a>
               <a class = "dropdown-item" href="{% url 'recipes:logout' %}?next={{ request.path }}">Logout</a>
             </div>
           </div>
