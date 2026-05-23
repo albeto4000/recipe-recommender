@@ -19,41 +19,61 @@ from operator import or_
 
 from .models import Recipe, Rating
 
+
+#This is the index, or the home page
 def index(request):
+	#I'll set up multiple rating sections on the home page. Each of these will send the user to the browse view (recipes:browse),
+	#with parameters to filter the results
 	base_url = reverse("recipes:browse")
 
+	#The first section recommends popular recipes, or recipes with the most ratings
 	pop_rec_category = "popular recipes"
+	#Gets the IDs of the 8 recipes with the most ratings
 	pop_rec_list = Recipe.objects.order_by("-review_count")[:8]
+	#Browse shows all recipes by popularity as its default, so I won't encode any arguments in the url
 	pop_rec_link = base_url
+	#Creates a dictionary to represent the pop_recs section
+	#The index view takes a list of dictionaries like this and formats them into HTML using the recipe-display.html template
 	pop_rec = {'category': pop_rec_category, 'list': pop_rec_list, 'url': pop_rec_link}
 
+	#Creates a recommendation section called "pizza party" that recommends popular recipes with "pizza" in the name
 	pizza_category = "pizza party"
 	pizza_list = Recipe.objects.filter(name__icontains='pizza').order_by("-review_count")[:8]
+	#I'll use urlencode to include a GET parameter in the url. This will show up as /recipes/browse?name=pizza
 	pizza_link = f"{base_url}?{urlencode({'name': 'pizza'})}"
 	pizza_rec = {'category': pizza_category, 'list': pizza_list, 'url': pizza_link}
 
+	#Creates a recommendation section using the category 'Weeknight'
 	weeknight_category = "tonight's dinner"
 	weeknight_list = Recipe.objects.filter(category='Weeknight').order_by("-review_count")[:8]
 	weeknight_link = f"{base_url}?{urlencode({'category': 'Weeknight'})}"
 	weeknight_rec = {'category': weeknight_category, 'list': weeknight_list, 'url': weeknight_link}
 
+	#Creates a recommendation section using the keyword 'Spring'
 	spring_category = "flavors of spring"
 	spring_list = Recipe.objects.filter(keywords__icontains='spring').order_by("-review_count")[:8]
 	spring_link = f"{base_url}?{urlencode({'keywords': 'spring'})}"
 	spring_rec = {'category': spring_category, 'list': spring_list, 'url': spring_link}
 
+	#Render displays a template with parameters included as a dict
+	#The index view takes parameter 'recs', a list of dictionaries that represent the recommendation sections
 	return render(request, 'recipes/index.html', {
 		'recs': [pop_rec, pizza_rec, weeknight_rec, spring_rec]
 	})
 
 
+#The browse view allows users to click through a filtered set of recipes
 def browse(request):
-	recipe_list = Recipe.objects.all()
-
+	#This object will be used to filter the recipes fetched from the database and displayed
 	query = Q()
 	
+	#Requests can be two types: GET and POST
+	#GET requests send data through the URL and is intended to fetch data from the database
+	#POST requests send data through the request body and is used for creating/updating the database
+	#Here, we'll retrieve the filters sent through the GET request
 	name = request.GET.get('name')
 	if name:
+		#If one of the filters is name, filter for all recipes whose name contains that value, ignoring capitalization
 		query &= Q(name__icontains=name)
 
 	category = request.GET.get('category')
@@ -64,11 +84,19 @@ def browse(request):
 	if keywords:
 		query &= Q(keywords__icontains=keywords)
 
+	#Queries the database using the filters defined above
 	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
 
+	#There are over 500,000 recipes in the database, and a page displaying all of them would take forever to load
+	#Django offers a class called the Paginator, which takes a queryset and splits it into subsets called pages
+	#I'll display the recipes 12 at a time, to ensure the display looks good on every page size using Bootstrap
+	#On large pages, this will be displayed as 3 rows of 4 recipes. Medium will change this to 4 rows of 3, and small will display 12 rows of 1
+	#12 is easy to divide. If we wanted, we could display 6 rows of 2, then 12 rows of 1 only on extra small (xs) screen widths
 	paginator = Paginator(recipe_list, 12)
 
+	#I'll send the current page as a GET parameter. When the user clicks the next page, this value will increment and the next page's content will be returned
 	page_number = request.GET.get('page')
+	#Gets the 12 recipes associated with the current page number
 	page_obj = paginator.get_page(page_number)
 
 	return render(request, 'recipes/browse.html', {
@@ -76,17 +104,31 @@ def browse(request):
 	})
 
 
+#This view displays the details of a recipe, including its ingredients, instructions, and related recipes
 def detail(request, recipe_id):
+	#get_object_or_404 checks to see if the recipe exists. Otherwise, this page will display a 404 (object not found) error
 	recipe = get_object_or_404(Recipe, pk = recipe_id)
 
+	#Some of the web-scraped ingredient text links to pages that no longer exist, and therefore displays as '[ error ]'
+	#For these pages, we'll instead use the unitless ingredient text from the original dataset. Otherwise, we'll parse that
+	#data from string versions of lists into actual lists using ast.literal_eval
+	#
+	#Any use of an eval() function is dangerous, as it leaves the site vulnerable to SQL injection attacks
+	#Users can write Python or SQL code as a new recipe, and the website will automatically run it
+	#Because this is an academic project, and not an actual website, we'll trust the users to interact with it responsibly
 	if recipe.ingredient_text != "['error']":
 		ingredients = ast.literal_eval(recipe.ingredient_text)
 	else:
 		ingredients = re.split(r'",\s*"', recipe.ingredients[3:-2])
+	#Converts the ingredient amounts and recipe instructions into lists using regex
 	ing_amounts = recipe.ingredient_quantities[2:-1].replace('\"', '').split(', ')
 	steps = re.split(r'",\s*"', recipe.instructions[3:-2])
     
+	#Removes the \D prefix from the recipe minutes
 	minutes = re.sub(r'\D', '', recipe.minutes)
+
+	#The nutrition information will be displayed as a table in a modal. I'll use a for-loop to create the table rows, meaning the 
+	#nutrition information needs to be formatted as a list. Each row will display the label, nutrition value (with units), and the percent of daily value
 	nutrition_labels = ['Calories', 'Total Fat', 'Saturated Fat', 'Cholesterol', 'Sodium', 'Total Carbohydrate', 'Dietary Fiber', 'Sugars', 'Protein']
 	nutrition_vals = [recipe.calories, recipe.fat_content, recipe.saturated_fat_content, recipe.cholesterol_content, recipe.sodium_content, recipe.carbohydrates_content, recipe.fiber_content, recipe.sugar_content, recipe.protein_content]
 	#Nutrient daily values sourced from the FDA (https://www.fda.gov/food/nutrition-facts-label/daily-value-nutrition-and-supplement-facts-labels)
@@ -94,6 +136,8 @@ def detail(request, recipe_id):
 	nutrition_units = ['', 'g', 'g', 'mg', 'mg', 'g', 'g', 'g', 'g']
 	nutrition_pct = [round((val / dv) * 100, 2) for val, dv in zip(nutrition_vals, nutrition_dv)]
 
+	#Users can submit ratings on this page. If a user has already rated this recipe, their rating should automatically display in the rating input
+	#If the user is currently signed in (is_autheticated), I'll determine if they've rated this recipe, then fetch their rating and review
 	if request.user.is_authenticated:
 		try:
 			user_rating = Rating.objects.get(user=request.user, recipe=recipe)
@@ -104,7 +148,9 @@ def detail(request, recipe_id):
 			review = ""
 	else:
 		score = None
+		review = ""
 
+	#Renders the page (with a lot of parameters)
 	return render(request, 'recipes/detail.html', {
 		'recipe': recipe, 
 		'ingredients': list(zip(ing_amounts, ingredients)), 
@@ -115,6 +161,7 @@ def detail(request, recipe_id):
 		'rating': score,
 		'review': review
   })
+
 
 
 def search(request):
@@ -177,9 +224,6 @@ def search(request):
 		],
 		'filters': 'keywords'
 	}
-
-#* Kid Friendly
-#* Toddler Friendly
 
 	return render(request, 'recipes/search.html', {
 		'filters': [season_filter, protein_filter, diet_filter, cook_time_filter],
