@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 def main():
 
     # Adding Path to data (!!Change to your Local Path!!!)
-    data_path = '/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/'
+    data_path = '../data/'
 
     # Loading the Train and Test Item Collection data files to be used to run models
     print("Loading Training Data and Test Item Data....")
@@ -49,7 +49,7 @@ def main():
     total_models = len(models)
 
     #Creating the model directory to save them (!!Change to your Local Path!!!)
-    model_dir = "/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/models/"
+    model_dir = "../models/"
 
     for i, (name, scorer) in enumerate(models.items(), 1):
         print(f"\n{'='*40}")

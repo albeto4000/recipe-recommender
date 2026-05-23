@@ -6,7 +6,9 @@ from django.views import generic
 from django.core.paginator import Paginator
 from django.utils.http import urlencode
 from django.core import serializers
-from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib.auth import authenticate, login, get_user_model, logout
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 
 import re
 import json
@@ -92,13 +94,26 @@ def detail(request, recipe_id):
 	nutrition_units = ['', 'g', 'g', 'mg', 'mg', 'g', 'g', 'g', 'g']
 	nutrition_pct = [round((val / dv) * 100, 2) for val, dv in zip(nutrition_vals, nutrition_dv)]
 
+	if request.user.is_authenticated:
+		try:
+			user_rating = Rating.objects.get(user=request.user, recipe=recipe)
+			score = user_rating.rating
+			review = user_rating.review
+		except Rating.DoesNotExist:
+			score = None  # User hasn't rated this recipe yet
+			review = ""
+	else:
+		score = None
+
 	return render(request, 'recipes/detail.html', {
 		'recipe': recipe, 
 		'ingredients': list(zip(ing_amounts, ingredients)), 
 		'n_ingredients': len(ingredients),
 		'steps': steps, 
 		'minutes': minutes,
-		'nutrition_info': list(zip(nutrition_labels, nutrition_vals, nutrition_units, nutrition_pct))
+		'nutrition_info': list(zip(nutrition_labels, nutrition_vals, nutrition_units, nutrition_pct)),
+		'rating': score,
+		'review': review
   })
 
 
@@ -206,15 +221,74 @@ def query(request):
 			'filters_selected': res['filter_label']
 	})
 
-# def login(request):
-# 	email = request.POST['email']
-# 	password = request.POST['password']
+@require_POST
+def login_view(request):
+	email = request.POST['email']
+	password = request.POST['password']
 
-# 	User = get_user_model()
+	username = get_user_model().objects.get(email = email).username
 
-# 	pass
+	user = authenticate(request, username = username, password = password)
 
-from django.contrib.auth.forms import AuthenticationForm
+	if user is not None:
+		login(request, user)
 
-def login_modal_form(request):
-    return {'login_form': AuthenticationForm()}
+		next_url = request.POST.get("next")
+
+		if next_url:
+			return redirect(next_url)
+		
+		return redirect("home")
+	else:
+		messages.error(request, "Invalid email or password.")
+
+		next_url = request.POST.get("next")
+
+		if next_url:
+			return redirect(next_url)
+		return redirect("home")
+
+
+def logout_view(request):
+    logout(request)
+
+    next_url = request.GET.get("next")
+
+    if next_url:
+        return redirect(next_url)
+
+    return redirect("home")
+
+
+from django.utils.timezone import localdate
+from django.db.models import F, Avg
+
+@login_required
+def submit_rating(request):
+	recipe_id = int(request.POST.get('recipe_id'))
+	recipe = get_object_or_404(Recipe, pk=recipe_id)
+
+	
+	if int(request.POST.get('rating')) > 0:
+		new_rating, created = Rating.objects.update_or_create(
+			user=request.user,
+			recipe=recipe,
+			defaults={
+				'rating': request.POST.get('rating'),
+				'review': request.POST.get('review'),
+				'date_submitted': localdate()
+			}
+		)	
+		
+	else:
+		Rating.objects.get(user=request.user, recipe=recipe).delete()
+
+	rating_count = Rating.objects.filter(recipe=recipe).count()
+	Recipe.objects.filter(id=recipe_id).update(review_count=rating_count)
+	if rating_count > 0:
+		avg_rating = round(Rating.objects.filter(recipe=recipe).aggregate(Avg('rating'))['rating__avg'] * 2) / 2
+		Recipe.objects.filter(id=recipe_id).update(aggregated_rating=avg_rating)
+	else:
+		Recipe.objects.filter(id=recipe_id).update(aggregated_rating=0)
+
+	return detail(request, recipe_id)

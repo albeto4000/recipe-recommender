@@ -6,10 +6,12 @@
 {% block content %}
 <div class="container pt-2 pb-4">
 	<h1>{{ recipe.name|safe }}</h1>
-	<div id="rating-input"></div>
+	{% if recipe.review_count != 0 %}
+		{% stars recipe.aggregated_rating True False %} ({{ recipe.review_count }})
+	{% endif %}
 	<hr />
 	<h5>Submitted by {{ recipe.contributor|title }}</h5>
-	<div class="fst-italic">"{{ recipe.description|capfirst|safe }}"</div>
+	<div>"{{ recipe.description|capfirst|safe }}"</div>
 	<br />
 	{% if recipe.images != "character(0" %}
 		<img id="recipe-img" src={{ recipe.images }} class="img-rounded" />
@@ -47,7 +49,22 @@
 			{% endif %}
 		{% endfor %}
 	</ol>
-		
+	
+	<h2>Rate This Recipe</h2>
+	<div id="rating-input"></div>
+
+	<div class="form-group">
+		<label for="exampleFormControlTextarea1"></label>
+		<textarea class="form-control" id="review-textbox" rows="3" placeholder="Made this recipe? Tell us what you think!">{{ review }}</textarea>
+	</div>
+	<div class="d-flex justify-content-end my-2">
+		<button type="submit" class="btn btn-primary" id="review-btn">Submit</button>
+	</div>
+	
+	
+	<br />
+
+	<h2>Reviews</h2>
 	{% for rating in recipe.rating_set.all %}
 		{% if forloop.counter <= 20 %}
 		<div class="card my-3 py-2">
@@ -97,10 +114,48 @@
 
 {% block scripts %}
 <script>
+	{% if rating %}
+		var is_rated = true;
+		var rating = {{ rating }} - 1;
+		var val = rating;
+	{% else %}
+		var is_rated = false;
+		var rating = 0;
+	{% endif %}
+
+	function update_stars(){
+		$('.rating-star').each(function(){
+			if(is_rated){
+				if($(this).attr('value') <= rating){
+					$(this).addClass('rating-star-active');
+					$(this).addClass('fa-solid');
+					$(this).removeClass('fa-regular');
+					$(this).addClass('text-warning');
+				}
+				else{
+					$(this).removeClass('rating-star-active');
+					$(this).removeClass('fa-solid');
+					$(this).addClass('fa-regular');
+					$(this).removeClass('text-warning');
+				}
+			}
+			else{
+				$(this).removeClass('rating-star-active');
+				$(this).removeClass('fa-solid');
+				$(this).addClass('fa-regular');
+				$(this).removeClass('text-warning');
+			}
+		});
+	}
+
 	//Uses javascript/jQuery to update the rating stars as the user interacts with them
 	$(document).ready(function(){
 		for(var i = 0; i < 5; i++){
 			$('#rating-input').append("<i role='button' value=" + i + " class='fa-regular fa-star rating-star'></i>");
+		}
+
+		if(is_rated){
+			update_stars();
 		}
 
 		$(document).on('click', '#show-nutrition', function(){
@@ -110,46 +165,40 @@
 		$(document).on('click', '.btn-close', function(){
 			$('#nutrition-modal').modal('hide');
 		});
-
-		var is_rated = false;
-		var rating = 0;
 		
 		//On rating star click
 		$(document).on('click', '.rating-star', function(){
 			val = $(this).attr('value');
 
-			if(val == rating){
-				rating = !rating;
+			if(val == rating && is_rated){
+				is_rated = !is_rated;
+				rating = -1;
 			}
 			else{
 				rating = val;
 			}
-
-
-			$('.rating-star').each(function(){
-				if(rating){
-					if($(this).attr('value') <= val){
-						$(this).addClass('rating-star-active');
-						$(this).addClass('fa-solid');
-						$(this).removeClass('fa-regular');
-						$(this).addClass('text-warning');
-						//$(this).removeClass('text-dark');
-					}
-					else{
-						$(this).removeClass('rating-star-active');
-						$(this).removeClass('fa-solid');
-						$(this).addClass('fa-regular');
-						$(this).removeClass('text-warning');
-						//$(this).addClass('text-dark');
-					}
-				}
-				else{
-					$(this).removeClass('rating-star-active');
-					$(this).removeClass('fa-solid');
-					$(this).addClass('fa-regular');
-					$(this).removeClass('text-warning');
+			
+			{% if user.is_authenticated %}
+			$.ajax({
+				url: "/recipes/rate/",
+				type: "POST",
+				headers: {
+					'X-CSRFToken': '{{ csrf_token }}',
+				},
+				data: {
+					'recipe_id': '{{ recipe.id }}',
+					'rating': parseInt(rating) + 1,
+					'review': $('#review-textbox').val()
+				},
+				success: function(response){
+					console.log("Success");
 				}
 			});
+			{% else %}
+				$('#login-modal').modal('show');
+			{% endif %}
+
+			update_stars();
 		});
 
 		//On star mouseover, fill in all stars up to that value
@@ -172,6 +221,28 @@
 					$(this).removeClass('fa-solid');
 				}
 			});
+		});
+
+		$(document).on('click', '#review-btn', function(){
+			{% if user.is_authenticated %}
+			$.ajax({
+				url: "/recipes/rate/",
+				type: "POST",
+				headers: {
+					'X-CSRFToken': '{{ csrf_token }}',
+				},
+				data: {
+					'recipe_id': '{{ recipe.id }}',
+					'rating': parseInt(rating) + 1,
+					'review': $('#review-textbox').val()
+				},
+				success: function(response){
+					console.log("Success");
+				}
+			});
+			{% else %}
+				$('#login-modal').modal('show');
+			{% endif %}
 		});
 	});
 </script>

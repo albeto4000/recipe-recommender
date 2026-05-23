@@ -8,5 +8,7 @@ urlpatterns = [
 		path("browse/", views.browse, name = "browse"),
 		path("search/", views.search, name = "search"),
 		path("query/", views.query, name = "query"),
-    path('accounts/', include('django.contrib.auth.urls'))
+    	path('login/', views.login_view, name = "login"),
+		path('logout/', views.logout_view, name = "logout"),
+		path('rate/', views.submit_rating, name = "rate")
 ]

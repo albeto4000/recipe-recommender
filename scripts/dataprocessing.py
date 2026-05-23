@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 def main():
 
     # Adding the data path (!! Change to your Local Path!!)
-    data_path = '/Users/ryanpeters7/Desktop/Spring 2026/DSCI 641/final project/data/'
+    data_path = '../data/'
 
     #Loading the Movie Lens dataset using the buidlt in load_movielens function
     print("Loading Recipe data...")

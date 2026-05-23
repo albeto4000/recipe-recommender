@@ -23,7 +23,14 @@
         </li>
       </ul>
       {% if user.is_authenticated %}
-          <div>Welcome, {{ user.username }}</div>
+           <div class="dropdown ms-auto">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Welcome, {{ user.username }}
+            </button>
+            <div class = "dropdown-menu" aria-labelledby = "navDropdown">
+              <a class = "dropdown-item" href="{% url 'recipes:logout' %}?next={{ request.path }}">Logout</a>
+            </div>
+          </div>
       {% else %}
           <button class="btn btn-primary ms-auto" data-bs-toggle="modal" data-bs-target="#login-modal">Login</button>
       {% endif %}
@@ -52,10 +59,10 @@
             <label for="password" class="col-form-label">PASSWORD</label>
             <input id="password" type="password" class="form-control" name="password">
           </div>
-        
+          <input type="hidden" name="next" value="{{ request.path }}">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-primary">Login</button>
       </div>
       </form>
     </div>
