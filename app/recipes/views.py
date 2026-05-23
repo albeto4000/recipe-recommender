@@ -70,7 +70,7 @@ def index(request):
 
 	if request.user.is_authenticated:
 		models = ['bias', 'explicit_mf', 'implicit_mf', 'item_item_implicit', 'item_item', 'slim', 'user_user']
-		user_id = 1634
+		user_id = request.user.id
 
 		for model in models:
 			with open(os.path.join(settings.BASE_DIR, '../models/' + model + '_pipeline.pkl'), 'rb') as fh:
@@ -294,7 +294,7 @@ def query(request):
 			)
 			#Adds the keywords filter to the query
 			query &= keyword_query
-		#FIlters by category, ignoring capitalization
+		#Filters by category, ignoring capitalization
 		elif filter_col == 'category':
 			query &= Q(category__in=filter_val)
 		#Filters by name, ignoring capitalization
@@ -357,12 +357,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
 
-    next_url = request.GET.get("next")
-
-    if next_url:
-        return redirect(next_url)
-
-    return redirect("home")
+    return redirect("recipes:index")
 
 
 #Route for users to submit new recipe ratings/reviews
