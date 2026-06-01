@@ -73,10 +73,16 @@ def index(request):
 		models = ['bias', 'item_item', 'user_user'] #'item_item_implicit', 'explicit_mf', 'implicit_mf', 'slim'
 		user_id = request.user.id
 
+		user_recipes = request.user.rating_set.values_list('recipe', flat = True)
+		user_ratings = request.user.rating_set.values_list('rating', flat = True)
+
+		history_items = lenskit.data.ItemList(user_recipes, rating=user_ratings)
+
 		for model in models:
 			with open(os.path.join(settings.BASE_DIR, '../models/' + model + '_pipeline.pkl'), 'rb') as fh:
 				rec_pipe = pickle.load(fh)
-			recs = recommend(rec_pipe, user_id, n=8).to_df()['item_id'].values
+			query = lenskit.data.RecQuery(user_id = -1, history_items = history_items)
+			recs = recommend(rec_pipe, query, n = 8).to_df()['item_id'].values
 			pipe_rec_list = Recipe.objects.filter(id__in=recs)
 			rec_list.append({
 				'category': model,
@@ -390,9 +396,6 @@ def submit_rating(request):
 	#Attempts to find the recipe iwth the given ID. Returns 404 error otherwise
 	recipe = get_object_or_404(Recipe, pk=recipe_id)
 
-	print(recipe.aggregated_rating)
-	print(round(Rating.objects.filter(recipe=recipe).aggregate(Avg('rating'))['rating__avg'] * 2) / 2)
-
 	#rating>0 means the user has clicked a star to rate, not clicked the star of their current rating to remove it
 	if int(request.POST.get('rating')) != 0:
 		#Attempts to create a new rating, or updates the rating if it already exists
@@ -424,6 +427,7 @@ def submit_rating(request):
 
 	#Redirects to the detail page for the current recipe
 	return detail(request, recipe_id)
+
 
 @login_required
 def reviews(request):
