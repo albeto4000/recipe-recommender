@@ -70,7 +70,7 @@ def index(request):
 	})
 
 	if request.user.is_authenticated:
-		models = ['bias', 'item_item', 'user_user'] #'item_item_implicit', 'explicit_mf', 'implicit_mf', 'slim'
+		models = ['item_item', 'user_user', 'slim', 'explicit_mf', 'implicit_mf'] #'item_item_implicit', 'explicit_mf', 'implicit_mf', 'slim'
 		user_id = request.user.id
 
 		user_recipes = request.user.rating_set.values_list('recipe', flat = True)
@@ -348,7 +348,7 @@ def login_view(request):
 		if next_url:
 			return redirect(next_url)
 		
-		return redirect("index")
+		return redirect("recipes/index")
 	#If the user is not valid, send an error message, then redirect to the current webpage
 	else:
 		messages.error(request, "Invalid email or password.")
@@ -357,7 +357,7 @@ def login_view(request):
 
 		if next_url:
 			return redirect(next_url)
-		return redirect("index")
+		return redirect("recipes/index")
 
 
 #Logs the user out
@@ -381,10 +381,10 @@ def signup_view(request):
 		)
 
 		login(request, user)
-		return redirect("index")
+		return redirect("recipes/index")
 	else:
 		messages.error(request, "A user with email " + email + " already exists")
-		return redirect("index")
+		return redirect("recipes/index")
 
 
 #Route for users to submit new recipe ratings/reviews

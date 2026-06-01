@@ -6,20 +6,22 @@
 {% block content %}
     <div class="container">
         {%  for rating in user.rating_set.all %}
-        <div class="card my-2">
-            <div class="row no-gutters">
-                <div class="col-auto">
-                    <img src="{{ rating.recipe.images }}" class="img-thumbnail" style="width:200px;height:150px" alt="">
-                </div>
-                <div class="col">
-                    <div class="card-block px-2">
-                        <h4 class="card-title">{{ rating.recipe }}</h4>
-                        <div>{% stars rating.rating False True %}</div>
-                        <div class="card-text py-2">{{ rating.review }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+				<a href="/recipes/{{ recipe.id }}/" class="text-decoration-none">
+					<div class="card my-2">
+							<div class="row no-gutters">
+									<div class="col-auto">
+											<img src="{{ rating.recipe.images }}" class="img-thumbnail" style="width:200px;height:150px" alt="">
+									</div>
+									<div class="col">
+											<div class="card-block px-2">
+													<h4 class="card-title">{{ rating.recipe|safe }}</h4>
+													<div>{% stars rating.rating False True %}</div>
+													<div class="card-text py-2">{{ rating.review }}</div>
+											</div>
+									</div>
+							</div>
+					</div>
+				</a>
         {% endfor %}
     </div>
 	
