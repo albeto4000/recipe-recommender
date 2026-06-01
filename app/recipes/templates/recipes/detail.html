@@ -65,7 +65,7 @@
 	<br />
 
 	<h2>Reviews</h2>
-	{% for rating in recipe.rating_set.all %}
+	{% for rating in recipe.rating_set.all|dictsortreversed:"date_submitted" %}
 		{% if forloop.counter <= 20 %}
 		<div class="card my-3 py-2">
 			<div class="card-body d-flex flex-column h-auto">
