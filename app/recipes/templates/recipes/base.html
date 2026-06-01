@@ -27,7 +27,7 @@
         <h1 class="modal-title fs-5 mx-auto">LOG IN</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0;"></button>
       </div>
-      <form action="{% url 'recipes:login' %}" method="POST">
+      <form action="{% url 'recipes:login' %}" method="POST" autocomplete="off">
       <div class="modal-body">
         
           {% csrf_token %}
@@ -56,14 +56,14 @@
 				</div>
       </div>
       </form>
-			`;
+			`
 
 			signup_modal = `
 			<div class="modal-header">
         <h1 class="modal-title fs-5 mx-auto">SIGN UP</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0;"></button>
       </div>
-      <form action="{% url 'recipes:signup' %}" method="POST">
+      <form action="{% url 'recipes:signup' %}" method="POST" autocomplete="off">
       <div class="modal-body">
           {% csrf_token %}
           <div class="mb-3">

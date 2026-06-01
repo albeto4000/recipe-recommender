@@ -48,8 +48,7 @@
 			<li>{{ step|capfirst }}</li>
 			{% endif %}
 		{% endfor %}
-	</ol>
-	
+	</ol>	
 	<h2>Rate This Recipe</h2>
 	<div id="rating-input"></div>
 
@@ -61,7 +60,8 @@
 		<button type="submit" class="btn btn-primary" id="review-btn">Submit</button>
 	</div>
 	
-	
+	<div>{{ recipe.keywords }}</div>
+
 	<br />
 
 	<h2>Reviews</h2>

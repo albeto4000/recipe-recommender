@@ -171,6 +171,8 @@ def detail(request, recipe_id):
 	nutrition_units = ['', 'g', 'g', 'mg', 'mg', 'g', 'g', 'g', 'g']
 	nutrition_pct = [round((val / dv) * 100, 2) for val, dv in zip(nutrition_vals, nutrition_dv)]
 
+	
+
 	#Users can submit ratings on this page. If a user has already rated this recipe, their rating should automatically display in the rating input
 	#If the user is currently signed in (is_autheticated), I'll determine if they've rated this recipe, then fetch their rating and review
 	if request.user.is_authenticated:
