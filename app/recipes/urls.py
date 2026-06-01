@@ -8,8 +8,9 @@ urlpatterns = [
 		path("browse/", views.browse, name = "browse"),
 		path("search/", views.search, name = "search"),
 		path("query/", views.query, name = "query"),
-    	path('login/', views.login_view, name = "login"),
+    path('login/', views.login_view, name = "login"),
 		path('logout/', views.logout_view, name = "logout"),
+		path('signup/', views.signup_view, name = "signup"),
 		path('rate/', views.submit_rating, name = "rate"),
 		path('reviews/', views.reviews, name = "reviews")
 ]

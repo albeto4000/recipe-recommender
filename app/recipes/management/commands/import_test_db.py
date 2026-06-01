@@ -40,7 +40,7 @@ class Command(BaseCommand):
 				.str.split(', ')
 				.str[0]
 		)
-
+		
 		#Handles any missing integer values
 		recipe_df.update(recipe_df.select_dtypes(include='number').fillna(0));
 
@@ -49,7 +49,8 @@ class Command(BaseCommand):
 				errors='coerce'
 		)
 
-		recipe_sample = recipe_df.drop_duplicates(subset = ['AuthorId']).sample(n = 100, random_state = 641).fillna(0)
+		#recipe_sample = recipe_df.drop_duplicates(subset = ['AuthorId']).sample(n = 100, random_state = 641).fillna(0)
+		recipe_sample = recipe_df.nlargest(500, 'ReviewCount').fillna(0)
 		ratings_sample = ratings_df[ratings_df['RecipeId'].isin(recipe_sample['RecipeId'])]
 		
 		#Selects all user table columns and drops duplicates

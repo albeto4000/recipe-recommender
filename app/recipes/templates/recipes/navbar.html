@@ -43,29 +43,7 @@
 <!-- Login Modal -->
  <div class="modal fade" id="login-modal" tabindex="-1" aria-labelledby="login-modal" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5 mx-auto">LOG IN</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0;"></button>
-      </div>
-      <form action="{% url 'recipes:login' %}" method="POST">
-      <div class="modal-body">
-        
-          {% csrf_token %}
-          <div class="mb-3">
-            <label for="email" class="col-form-label">EMAIL</label>
-            <input id="email" type="email" class="form-control" name="email">
-          </div>
-          <div class="mb-3">
-            <label for="password" class="col-form-label">PASSWORD</label>
-            <input id="password" type="password" class="form-control" name="password">
-          </div>
-          <input type="hidden" name="next" value="{{ request.path }}">
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Login</button>
-      </div>
-      </form>
-    </div>
+    <div id="login-signup-content" class="modal-content">
+    </div> <!-- End modal content -->
   </div>
 </div>

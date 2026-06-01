@@ -21,5 +21,88 @@
 		{% block scripts %}
 		
 		{% endblock %}
+		<script>
+			login_modal = `
+			<div class="modal-header">
+        <h1 class="modal-title fs-5 mx-auto">LOG IN</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0;"></button>
+      </div>
+      <form action="{% url 'recipes:login' %}" method="POST">
+      <div class="modal-body">
+        
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="email" class="col-form-label">EMAIL</label>
+            <input id="email" type="email" class="form-control" name="email">
+          </div>
+          <div class="mb-3">
+            <label for="password" class="col-form-label">PASSWORD</label>
+            <input id="password" type="password" class="form-control" name="password">
+          </div>
+          <input type="hidden" name="next" value="{{ request.path }}">
+      </div>
+      <div class="modal-footer">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-12 d-flex justify-content-end">
+							<button type="submit" class="btn btn-primary">Login</button>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-12 d-flex justify-content-center">
+							<div>Don't have an account yet? <a id="signup-btn" role="button" class="link">Sign up</a></div>
+						</div>
+					</div>
+				</div>
+      </div>
+      </form>
+			`;
+
+			signup_modal = `
+			<div class="modal-header">
+        <h1 class="modal-title fs-5 mx-auto">SIGN UP</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0;"></button>
+      </div>
+      <form action="{% url 'recipes:signup' %}" method="POST">
+      <div class="modal-body">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="email" class="col-form-label">EMAIL</label>
+            <input id="email" type="email" class="form-control" name="email">
+          </div>
+          <div class="mb-3">
+            <label for="password" class="col-form-label">PASSWORD</label>
+            <input id="password" type="password" class="form-control" name="password">
+          </div>
+          <input type="hidden" name="next" value="{{ request.path }}">
+      </div>
+      <div class="modal-footer">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-12 d-flex justify-content-end">
+							<button type="submit" class="btn btn-primary">Sign Up</button>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-12 d-flex justify-content-center">
+							<div>Existing user? <a id="login-btn" role="button" class="link">Sign in here</a></div>
+						</div>
+					</div>
+				</div>
+      </div>
+      </form>
+			`
+
+			$(document).ready(function(){
+				$("#login-signup-content").html(login_modal);
+
+				$(document).on("click", "#signup-btn", function(){
+					$('#login-signup-content').html(signup_modal);
+				});
+				$(document).on("click", "#login-btn", function(){
+					$('#login-signup-content').html(login_modal);
+				});
+			});
+		</script>
 	</body>
 </html>

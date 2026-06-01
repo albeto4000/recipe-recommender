@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.timezone import localdate
 from django.db.models import F, Avg
 from django.conf import settings
+from django.contrib import messages
 
 import re
 import json
@@ -69,7 +70,7 @@ def index(request):
 	})
 
 	if request.user.is_authenticated:
-		models = ['bias', 'explicit_mf', 'implicit_mf', 'item_item_implicit', 'item_item', 'slim', 'user_user']
+		models = ['bias', 'item_item', 'user_user'] #'item_item_implicit', 'explicit_mf', 'implicit_mf', 'slim'
 		user_id = request.user.id
 
 		for model in models:
@@ -341,7 +342,7 @@ def login_view(request):
 		if next_url:
 			return redirect(next_url)
 		
-		return redirect("home")
+		return redirect("index")
 	#If the user is not valid, send an error message, then redirect to the current webpage
 	else:
 		messages.error(request, "Invalid email or password.")
@@ -350,7 +351,7 @@ def login_view(request):
 
 		if next_url:
 			return redirect(next_url)
-		return redirect("home")
+		return redirect("index")
 
 
 #Logs the user out
@@ -358,6 +359,26 @@ def logout_view(request):
     logout(request)
 
     return redirect("recipes:index")
+
+@require_POST
+def signup_view(request):
+	#Gets the email and password sent to the back-end (by post)
+	email = request.POST['email']
+	password = request.POST['password']
+
+	if not get_user_model().objects.filter(email=email).exists():
+		# 2. Safely create the user with a hashed password
+		user = get_user_model().objects.create_user(
+				username=email.split('@')[0],
+				email=email,
+				password=password
+		)
+
+		login(request, user)
+		return redirect("index")
+	else:
+		messages.error(request, "A user with email " + email + " already exists")
+		return redirect("index")
 
 
 #Route for users to submit new recipe ratings/reviews
