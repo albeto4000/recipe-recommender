@@ -24,10 +24,7 @@ from functools import reduce
 from operator import or_
 
 from .models import Recipe, Rating
-import pandas as pd
-
-import recipes.similar_items as similar_items
-
+from . import similar_items as similar_items
 
 #This is the index, or the home page
 def index(request):
@@ -90,7 +87,7 @@ def index(request):
 			rec_list.append({
 				'category': model_name,
 				'list': pipe_rec_list,
-				'url': base_url
+				'url': reverse('recipes:browse', query={'model': model_name})
 			})
 
 	#Render displays a template with parameters included as a dict
@@ -102,28 +99,52 @@ def index(request):
 
 #The browse view allows users to click through a filtered set of recipes
 def browse(request):
-	#This object will be used to filter the recipes fetched from the database and displayed
-	query = Q()
-	
-	#Requests can be two types: GET and POST
-	#GET requests send data through the URL and is intended to fetch data from the database
-	#POST requests send data through the request body and is used for creating/updating the database
-	#Here, we'll retrieve the filters sent through the GET request
-	name = request.GET.get('name')
-	if name:
-		#If one of the filters is name, filter for all recipes whose name contains that value, ignoring capitalization
-		query &= Q(name__icontains=name)
+	model = request.GET.get('model')
+	if model:
+		ml_config = apps.get_app_config('recipes')
 
-	category = request.GET.get('category')
-	if category:
-		query &= Q(category=category)
+		n = 100
+		
+		if model in ['slim', 'implicit_mf']:
+			n += 1
 
-	keywords = request.GET.get('keywords')
-	if keywords:
-		query &= Q(keywords__icontains=keywords)
+		#Fetches the recipes the user has rated, and the ratings they assigned
+		user_recipes = request.user.rating_set.values_list('recipe', flat = True)
+		user_ratings = request.user.rating_set.values_list('rating', flat = True)
 
-	#Queries the database using the filters defined above
-	recipe_list = Recipe.objects.filter(query).order_by('-review_count')
+		#Creates an itemlist, history_items, that stores a user's item interactions
+		history_items = lenskit.data.ItemList(user_recipes, rating=user_ratings)
+		#Initializes a lenskit RecQuery using the user's item interactions
+		#We use RecQuery over user_id to ensure recommenders can integrate new users and new interactions
+		query = lenskit.data.RecQuery(user_id = -1, history_items = history_items)
+
+		recs = recommend(ml_config.rec_models[model], query, n = n).to_df()['item_id'].values
+		#Fetches the 8 recipes that correspond to the recommended IDs
+		recipe_list = Recipe.objects.filter(id__in=recs)
+		
+	else:
+		#This object will be used to filter the recipes fetched from the database and displayed
+		query = Q()
+		
+		#Requests can be two types: GET and POST
+		#GET requests send data through the URL and is intended to fetch data from the database
+		#POST requests send data through the request body and is used for creating/updating the database
+		#Here, we'll retrieve the filters sent through the GET request
+		name = request.GET.get('name')
+		if name:
+			#If one of the filters is name, filter for all recipes whose name contains that value, ignoring capitalization
+			query &= Q(name__icontains=name)
+
+		category = request.GET.get('category')
+		if category:
+			query &= Q(category=category)
+
+		keywords = request.GET.get('keywords')
+		if keywords:
+			query &= Q(keywords__icontains=keywords)
+
+		#Queries the database using the filters defined above
+		recipe_list = Recipe.objects.filter(query).order_by('-review_count')
 
 	#There are over 500,000 recipes in the database, and a page displaying all of them would take forever to load
 	#Django offers a class called the Paginator, which takes a queryset and splits it into subsets called pages
@@ -190,26 +211,8 @@ def detail(request, recipe_id):
 		score = None
 		review = ""
 
-	# #Loads the models from the Django app config
-	# ml_config = apps.get_app_config('recipes')
-	# #Fetches the ItemKNN scorer similarity matrix
-	# knn_sim = ml_config.rec_models['item_item'].component('scorer').sim_matrix.to_scipy()
-	# if recipe_id < knn_sim.shape[0]:
-	# 	#Gets the similarity of every recipe to the current one, sorts from least to greatest, then retrieves the IDs of the 4 most similar
-	# 	knn_closest = np.argsort(knn_sim[recipe_id, :].toarray().ravel())[-4:]
-		
-	# 	#Fetches the recipes by ID
-	# 	similar_recipes = Recipe.objects.filter(id__in=knn_closest)
-	# else:
-	# 	similar_recipes = None
-	
-	similar_recipes = None
-	df = pd.DataFrame.from_records(Recipe.objects.all().values('id', 'category', 'keywords'))
-
-	tfidf, tfidf_matrix = similar_items.fit_tfidf(df)
-	recipe_indices = pd.Series(df.index, index=df['id']).drop_duplicates()
-
-	results = similar_items.get_recommendations(recipe_id, tfidf_matrix, df, recipe_indices, top_n=4)
+	ml_config = apps.get_app_config('recipes')
+	results = similar_items.get_recommendations(recipe_id, ml_config.tfidf_matrix, ml_config.df, ml_config.recipe_indices, top_n=4)
 
 	#Renders the page (with a lot of parameters)
 	return render(request, 'recipes/detail.html', {

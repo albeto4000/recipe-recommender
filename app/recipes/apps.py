@@ -3,6 +3,8 @@ from django.conf import settings
 import os
 import joblib
 
+import pandas as pd
+
 class RecipesConfig(AppConfig):
 	default_auto_field = 'django.db.models.BigAutoField'
 	name = 'recipes'
@@ -13,9 +15,18 @@ class RecipesConfig(AppConfig):
 		'explicit_mf': None,
 		'implicit_mf': None
 	}
+
+	tfidf_matrix = None
+	df = None
+	recipe_indices = None
 	
 	def ready(self):
+		from . import similar_items as similar_items
+		from .models import Recipe
+
 		for model in self.rec_models.keys():
 			self.rec_models[model] = joblib.load(os.path.join(settings.BASE_DIR, '../models/' + model + '_pipeline.pkl'))
 
-		
+		self.df = pd.DataFrame.from_records(Recipe.objects.all().values('id', 'category', 'keywords'))
+		_, self.tfidf_matrix = similar_items.fit_tfidf(self.df)
+		self.recipe_indices = pd.Series(self.df.index, index=self.df['id']).drop_duplicates()
