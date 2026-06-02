@@ -1,27 +1,23 @@
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
-from django.views import generic
 from django.core.paginator import Paginator
-from django.utils.http import urlencode
-from django.core import serializers
 from django.contrib.auth import authenticate, login, get_user_model, logout
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import localdate
-from django.db.models import F, Avg
+from django.db.models import Avg
 from django.conf import settings
 from django.contrib import messages
+
+from django.apps import apps
 
 import re
 import json
 import ast
-import pickle
-import os
 
 import lenskit
-from lenskit import batch, recommend
+from lenskit import recommend
 
 from functools import reduce
 from operator import or_
@@ -36,21 +32,11 @@ def index(request):
 	base_url = reverse("recipes:browse")
 
 	rec_list = []
-	
-	# pop_order_list = Recipe.objects.order_by("-review_count")[:8]
-	
-	# pop_order_link = base_url
-	
-	# pop_order_rec = {
-	# 	'category': pop_order_category, 
-	# 	'list': pop_order_list, 
-	# 	'url': pop_order_link
-	# }
 
 	#The first section recommends popular recipes, or recipes with the most ratings
 	#Reads the pop_scorer pipe from the models directory
-	with open(os.path.join(settings.BASE_DIR, '../models/popular_pipeline.pkl'), 'rb') as fh:
-		pop_pipe = pickle.load(fh)
+	ml_config = apps.get_app_config('recipes')
+	pop_pipe = ml_config.pop
 
 	#Gets the IDs of the 8 recipes with the most ratings
 	pop_rec_category = "popular recipes"
@@ -70,22 +56,28 @@ def index(request):
 	})
 
 	if request.user.is_authenticated:
-		models = ['item_item', 'user_user', 'slim', 'explicit_mf', 'implicit_mf'] #'item_item_implicit', 'explicit_mf', 'implicit_mf', 'slim'
-		user_id = request.user.id
-
+		#Lists model names, which will be displayed above the recommendation sections
+		model_names = ['item_item', 'user_user', 'slim', 'explicit_mf', 'implicit_mf'] #'item_item_implicit', 'explicit_mf', 'implicit_mf', 'slim'
+		#Gets the recommender models, which are loaded on app startup
+		models = [ml_config.item_item, ml_config.user_user, ml_config.slim, ml_config.explicit_mf, ml_config.implicit_mf]
+		
+		#Fetches the recipes the user has rated, and the ratings they assigned
 		user_recipes = request.user.rating_set.values_list('recipe', flat = True)
 		user_ratings = request.user.rating_set.values_list('rating', flat = True)
-
+		#Creates an itemlist, history_items, that stores a user's item interactions
 		history_items = lenskit.data.ItemList(user_recipes, rating=user_ratings)
+		#Initializes a lenskit RecQuery using the user's item interactions
+		#We use RecQuery over user_id to ensure recommenders can integrate new users and new interactions
+		query = lenskit.data.RecQuery(user_id = -1, history_items = history_items)
 
-		for model in models:
-			with open(os.path.join(settings.BASE_DIR, '../models/' + model + '_pipeline.pkl'), 'rb') as fh:
-				rec_pipe = pickle.load(fh)
-			query = lenskit.data.RecQuery(user_id = -1, history_items = history_items)
-			recs = recommend(rec_pipe, query, n = 8).to_df()['item_id'].values
+		for model_name, model in zip(model_names, models):
+			#Gets 8 recommendations from the current model and extracts item IDs
+			recs = recommend(model, query, n = 8).to_df()['item_id'].values
+			#Fetches the 8 recipes that correspond to the recommended IDs
 			pipe_rec_list = Recipe.objects.filter(id__in=recs)
+			#Creates a new recommendation section using the model name and recommended recipes
 			rec_list.append({
-				'category': model,
+				'category': model_name,
 				'list': pipe_rec_list,
 				'url': base_url
 			})
@@ -94,7 +86,7 @@ def index(request):
 	#The index view takes parameter 'recs', a list of dictionaries that represent the recommendation sections
 	return render(request, 'recipes/index.html', {
 		'recs': rec_list
-	})
+	})	
 
 
 #The browse view allows users to click through a filtered set of recipes
@@ -171,7 +163,7 @@ def detail(request, recipe_id):
 	nutrition_units = ['', 'g', 'g', 'mg', 'mg', 'g', 'g', 'g', 'g']
 	nutrition_pct = [round((val / dv) * 100, 2) for val, dv in zip(nutrition_vals, nutrition_dv)]
 
-	
+	keywords = re.split(r'",\s*"', recipe.keywords[3:-2])
 
 	#Users can submit ratings on this page. If a user has already rated this recipe, their rating should automatically display in the rating input
 	#If the user is currently signed in (is_autheticated), I'll determine if they've rated this recipe, then fetch their rating and review
@@ -187,6 +179,13 @@ def detail(request, recipe_id):
 		score = None
 		review = ""
 
+
+	ml_config = apps.get_app_config('recipes')
+	
+	
+
+	
+
 	#Renders the page (with a lot of parameters)
 	return render(request, 'recipes/detail.html', {
 		'recipe': recipe, 
@@ -196,7 +195,8 @@ def detail(request, recipe_id):
 		'minutes': minutes,
 		'nutrition_info': list(zip(nutrition_labels, nutrition_vals, nutrition_units, nutrition_pct)),
 		'rating': score,
-		'review': review
+		'review': review,
+		'keywords': keywords
   })
 
 
@@ -350,7 +350,7 @@ def login_view(request):
 		if next_url:
 			return redirect(next_url)
 		
-		return redirect("recipes/index")
+		return redirect("recipes:index")
 	#If the user is not valid, send an error message, then redirect to the current webpage
 	else:
 		messages.error(request, "Invalid email or password.")
@@ -359,7 +359,7 @@ def login_view(request):
 
 		if next_url:
 			return redirect(next_url)
-		return redirect("recipes/index")
+		return redirect("recipes:index")
 
 
 #Logs the user out
@@ -373,7 +373,7 @@ def signup_view(request):
 	#Gets the email and password sent to the back-end (by post)
 	email = request.POST['email']
 	password = request.POST['password']
-
+	
 	if not get_user_model().objects.filter(email=email).exists():
 		# 2. Safely create the user with a hashed password
 		user = get_user_model().objects.create_user(
@@ -382,11 +382,13 @@ def signup_view(request):
 				password=password
 		)
 
+		print("User created with email", email)
 		login(request, user)
-		return redirect("recipes/index")
+		return redirect("recipes:index")
 	else:
 		messages.error(request, "A user with email " + email + " already exists")
-		return redirect("recipes/index")
+		print("User already exists")
+		return redirect("recipes:index")
 
 
 #Route for users to submit new recipe ratings/reviews

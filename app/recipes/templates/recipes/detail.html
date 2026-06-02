@@ -23,6 +23,15 @@
 		<div class="my-2"><i class="fa-solid fa-apple-whole"></i> Ingredients: {{ n_ingredients }}</div>
 		<div class="my-2"><i class="fa-solid fa-bowl-food"></i> Servings: {{ recipe.servings }}</div>
 		<div class="my-2 link-primary" id="show-nutrition" role="button" data-bs-toggle="modal" data-bs-target="#nutrition-modal">Nutrition Information</div>
+		
+		<section class="my-2">
+			<h5>Keywords</h5>
+			{% for keyword in keywords %}
+				<a class="btn btn-outline-primary me-1 mb-1" href="{% url 'recipes:browse' %}?keywords={{ keyword }}">
+					{{ keyword }}
+				</a>
+			{% endfor %}
+		</section>
 	</div>
 	<hr />
 	<h2>Ingredients</h2>
@@ -60,8 +69,6 @@
 		<button type="submit" class="btn btn-primary" id="review-btn">Submit</button>
 	</div>
 	
-	<div>{{ recipe.keywords }}</div>
-
 	<br />
 
 	<h2>Reviews</h2>
