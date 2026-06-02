@@ -5,8 +5,8 @@
 
 {% block content %}
     <div class="container">
-        {%  for rating in user.rating_set.all %}
-				<a href="/recipes/{{ recipe.id }}/" class="text-decoration-none">
+        {%  for rating in user.rating_set.all|dictsortreversed:"rating" %}
+				<a href="/recipes/{{ rating.recipe.id }}/" class="text-decoration-none">
 					<div class="card my-2">
 							<div class="row no-gutters">
 									<div class="col-auto">

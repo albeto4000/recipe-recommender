@@ -15,6 +15,7 @@ from django.apps import apps
 import re
 import json
 import ast
+import numpy as np
 
 import lenskit
 from lenskit import recommend
@@ -64,6 +65,15 @@ def index(request):
 		#Fetches the recipes the user has rated, and the ratings they assigned
 		user_recipes = request.user.rating_set.values_list('recipe', flat = True)
 		user_ratings = request.user.rating_set.values_list('rating', flat = True)
+
+		#Adds a recommendation section for recipes the user has recently rated 4 stars or higher
+		make_again = request.user.rating_set.filter(rating__gte=4).order_by("-rating", "-date_submitted").values_list('recipe')[:8]
+		rec_list.append({
+			'category': 'make again',
+			'list': Recipe.objects.filter(id__in=make_again),
+			'url': reverse('recipes:reviews')
+		})
+
 		#Creates an itemlist, history_items, that stores a user's item interactions
 		history_items = lenskit.data.ItemList(user_recipes, rating=user_ratings)
 		#Initializes a lenskit RecQuery using the user's item interactions
@@ -179,12 +189,18 @@ def detail(request, recipe_id):
 		score = None
 		review = ""
 
-
+	#Loads the model from the Django app config
 	ml_config = apps.get_app_config('recipes')
-	
-	
-
-	
+	#Fetches the ItemKNN scorer similarity matrix
+	knn_sim = ml_config.item_item.component('scorer').sim_matrix.to_scipy()
+	if recipe_id < knn_sim.shape[0]:
+		#Gets the similarity of every recipe to the current one, sorts from least to greatest, then retrieves the IDs of the 4 most similar
+		knn_closest = np.argsort(knn_sim[recipe_id, :].toarray().ravel())[-4:]
+		
+		#Fetches the recipes by ID
+		similar_recipes = Recipe.objects.filter(id__in=knn_closest)
+	else:
+		similar_recipes = None
 
 	#Renders the page (with a lot of parameters)
 	return render(request, 'recipes/detail.html', {
@@ -196,7 +212,8 @@ def detail(request, recipe_id):
 		'nutrition_info': list(zip(nutrition_labels, nutrition_vals, nutrition_units, nutrition_pct)),
 		'rating': score,
 		'review': review,
-		'keywords': keywords
+		'keywords': keywords,
+		'similar_recipes': similar_recipes
   })
 
 
