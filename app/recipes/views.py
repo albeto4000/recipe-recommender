@@ -25,6 +25,8 @@ from operator import or_
 
 from .models import Recipe, Rating
 
+import recipes.similar_items
+
 
 #This is the index, or the home page
 def index(request):
@@ -37,7 +39,7 @@ def index(request):
 	#The first section recommends popular recipes, or recipes with the most ratings
 	#Reads the pop_scorer pipe from the models directory
 	ml_config = apps.get_app_config('recipes')
-	pop_pipe = ml_config.pop
+	pop_pipe = ml_config.rec_models['popular']
 
 	#Gets the IDs of the 8 recipes with the most ratings
 	pop_rec_category = "popular recipes"
@@ -58,10 +60,8 @@ def index(request):
 
 	if request.user.is_authenticated:
 		#Lists model names, which will be displayed above the recommendation sections
-		model_names = ['item_item', 'user_user', 'slim', 'explicit_mf', 'implicit_mf'] #'item_item_implicit', 'explicit_mf', 'implicit_mf', 'slim'
-		#Gets the recommender models, which are loaded on app startup
-		models = [ml_config.item_item, ml_config.user_user, ml_config.slim, ml_config.explicit_mf, ml_config.implicit_mf]
-		
+		model_names = ['item_item', 'user_user', 'slim', 'explicit_mf', 'implicit_mf']
+	
 		#Fetches the recipes the user has rated, and the ratings they assigned
 		user_recipes = request.user.rating_set.values_list('recipe', flat = True)
 		user_ratings = request.user.rating_set.values_list('rating', flat = True)
@@ -80,9 +80,9 @@ def index(request):
 		#We use RecQuery over user_id to ensure recommenders can integrate new users and new interactions
 		query = lenskit.data.RecQuery(user_id = -1, history_items = history_items)
 
-		for model_name, model in zip(model_names, models):
+		for model_name in model_names:
 			#Gets 8 recommendations from the current model and extracts item IDs
-			recs = recommend(model, query, n = 8).to_df()['item_id'].values
+			recs = recommend(ml_config.rec_models[model_name], query, n = 8).to_df()['item_id'].values
 			#Fetches the 8 recipes that correspond to the recommended IDs
 			pipe_rec_list = Recipe.objects.filter(id__in=recs)
 			#Creates a new recommendation section using the model name and recommended recipes
@@ -189,18 +189,26 @@ def detail(request, recipe_id):
 		score = None
 		review = ""
 
-	#Loads the model from the Django app config
-	ml_config = apps.get_app_config('recipes')
-	#Fetches the ItemKNN scorer similarity matrix
-	knn_sim = ml_config.item_item.component('scorer').sim_matrix.to_scipy()
-	if recipe_id < knn_sim.shape[0]:
-		#Gets the similarity of every recipe to the current one, sorts from least to greatest, then retrieves the IDs of the 4 most similar
-		knn_closest = np.argsort(knn_sim[recipe_id, :].toarray().ravel())[-4:]
+	# #Loads the models from the Django app config
+	# ml_config = apps.get_app_config('recipes')
+	# #Fetches the ItemKNN scorer similarity matrix
+	# knn_sim = ml_config.rec_models['item_item'].component('scorer').sim_matrix.to_scipy()
+	# if recipe_id < knn_sim.shape[0]:
+	# 	#Gets the similarity of every recipe to the current one, sorts from least to greatest, then retrieves the IDs of the 4 most similar
+	# 	knn_closest = np.argsort(knn_sim[recipe_id, :].toarray().ravel())[-4:]
 		
-		#Fetches the recipes by ID
-		similar_recipes = Recipe.objects.filter(id__in=knn_closest)
-	else:
-		similar_recipes = None
+	# 	#Fetches the recipes by ID
+	# 	similar_recipes = Recipe.objects.filter(id__in=knn_closest)
+	# else:
+	# 	similar_recipes = None
+	
+	similar_recipes = None
+
+	tfidf, tfidf_matrix = similar_items.fit_tfidf()
+
+	temp = similar_items.get_recommendations(recipe_id, top_n = 4)
+	print(Recipe.objects.filter(id__in=temp))
+	
 
 	#Renders the page (with a lot of parameters)
 	return render(request, 'recipes/detail.html', {
