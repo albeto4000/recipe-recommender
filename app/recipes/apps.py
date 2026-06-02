@@ -9,8 +9,6 @@ class RecipesConfig(AppConfig):
 
 	rec_models = {
 		'popular': None,
-		'item_item': None,
-		'user_user': None,
 		'slim': None,
 		'explicit_mf': None,
 		'implicit_mf': None

@@ -25,10 +25,10 @@ def create_soup_metadata_df(df):
     '''
     data = df.copy()
     # Applying clean words function to the data
-    data['cleaned_keywords'] = data['Keywords'].apply(clean_keywords)
+    data['cleaned_keywords'] = data['keywords'].apply(clean_keywords)
 
     # Replace spaces in category so "Main Dish" becomes "Main_Dish"
-    data['clean_category'] = data['RecipeCategory'].fillna('').str.replace(' ', '_')
+    data['clean_category'] = data['category'].fillna('').str.replace(' ', '_')
 
     # Combine them into a single metadata string
     data['metadata_soup'] = data['clean_category'] + " " + data['cleaned_keywords']

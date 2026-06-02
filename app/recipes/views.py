@@ -24,8 +24,9 @@ from functools import reduce
 from operator import or_
 
 from .models import Recipe, Rating
+import pandas as pd
 
-import recipes.similar_items
+import recipes.similar_items as similar_items
 
 
 #This is the index, or the home page
@@ -60,7 +61,7 @@ def index(request):
 
 	if request.user.is_authenticated:
 		#Lists model names, which will be displayed above the recommendation sections
-		model_names = ['item_item', 'user_user', 'slim', 'explicit_mf', 'implicit_mf']
+		model_names = ['slim', 'explicit_mf', 'implicit_mf']
 	
 		#Fetches the recipes the user has rated, and the ratings they assigned
 		user_recipes = request.user.rating_set.values_list('recipe', flat = True)
@@ -203,12 +204,12 @@ def detail(request, recipe_id):
 	# 	similar_recipes = None
 	
 	similar_recipes = None
+	df = pd.DataFrame.from_records(Recipe.objects.all().values('id', 'category', 'keywords'))
 
-	tfidf, tfidf_matrix = similar_items.fit_tfidf()
+	tfidf, tfidf_matrix = similar_items.fit_tfidf(df)
+	recipe_indices = pd.Series(df.index, index=df['id']).drop_duplicates()
 
-	temp = similar_items.get_recommendations(recipe_id, top_n = 4)
-	print(Recipe.objects.filter(id__in=temp))
-	
+	results = similar_items.get_recommendations(recipe_id, tfidf_matrix, df, recipe_indices, top_n=4)
 
 	#Renders the page (with a lot of parameters)
 	return render(request, 'recipes/detail.html', {
@@ -221,7 +222,7 @@ def detail(request, recipe_id):
 		'rating': score,
 		'review': review,
 		'keywords': keywords,
-		'similar_recipes': similar_recipes
+		'similar_recipes': Recipe.objects.filter(id__in=results)
   })
 
 
