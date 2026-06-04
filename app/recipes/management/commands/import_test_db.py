@@ -50,7 +50,7 @@ class Command(BaseCommand):
 		)
 
 		#recipe_sample = recipe_df.drop_duplicates(subset = ['AuthorId']).sample(n = 100, random_state = 641).fillna(0)
-		recipe_sample = recipe_df.nlargest(500, 'ReviewCount').fillna(0)
+		recipe_sample = recipe_df.nlargest(1000, 'ReviewCount').fillna(0)
 		ratings_sample = ratings_df[ratings_df['RecipeId'].isin(recipe_sample['RecipeId'])]
 		
 		#Selects all user table columns and drops duplicates
@@ -118,8 +118,7 @@ class Command(BaseCommand):
 						servings=row.RecipeServings,
 						recipe_yield=row.RecipeYield,
 						instructions=row.RecipeInstructions,
-						ingredient_text=row.RecipeIngredientText,
-						ingredient_units=row.RecipeIngredientUnits 
+						ingredient_text=row.RecipeIngredientText
 				)
 				for row in recipe_sample.itertuples(index=False)
 		]

@@ -114,8 +114,7 @@ class Command(BaseCommand):
 						servings=row.RecipeServings,
 						recipe_yield=row.RecipeYield,
 						instructions=row.RecipeInstructions,
-						ingredient_text=row.RecipeIngredientText,
-						ingredient_units=row.RecipeIngredientUnits 
+						ingredient_text=row.RecipeIngredientText
 				)
 				for row in recipe_df.itertuples(index=False)
 		]

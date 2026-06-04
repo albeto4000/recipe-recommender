@@ -17,7 +17,7 @@ class Recipe(models.Model):
 	ingredient_quantities = models.TextField()
 	ingredients = models.TextField()
 	aggregated_rating = models.FloatField()
-	review_count = models.IntegerField(default = 0)
+	review_count = models.IntegerField(default = 0, db_index = True)
 	calories = models.IntegerField(default = 0)
 	fat_content = models.IntegerField(default = 0)
 	saturated_fat_content = models.IntegerField(default = 0)
@@ -31,7 +31,6 @@ class Recipe(models.Model):
 	recipe_yield = models.CharField(max_length = 200)
 	instructions = models.TextField()
 	ingredient_text = models.TextField()
-	ingredient_units = models.TextField()
 
 	
 	def __str__(self):
