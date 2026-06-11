@@ -1,51 +1,42 @@
-# Stage 1: Base build stage
 FROM python:3.13-slim AS builder
- 
-# Create the app directory
-RUN mkdir /app
- 
-# Set the working directory
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 WORKDIR /app
- 
-# Set environment variables to optimize Python
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1 
- 
-# Upgrade pip and install dependencies
-RUN pip install --upgrade pip 
- 
-# Copy the requirements file first (better caching)
-COPY requirements.txt /app/
- 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
- 
-# Stage 2: Production stage
+
+COPY pyproject.toml uv.lock ./
+
+RUN uv sync --locked --no-dev
+
+COPY . .
+
+# RUN uv run download_models.py
+
+
 FROM python:3.13-slim
- 
-RUN useradd -m -r appuser && \
-   mkdir /app && \
-   chown -R appuser /app
- 
-# Copy the Python dependencies from the builder stage
-COPY --from=builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
-COPY --from=builder /usr/local/bin/ /usr/local/bin/
- 
-# Set the working directory
+
+RUN useradd -m -r appuser
+
 WORKDIR /app
- 
-# Copy application code
+
+COPY --from=builder \
+     --chown=appuser:appuser \
+     /app/.venv \
+     /app/.venv
+# COPY --from=builder \
+#      --chown=appuser:appuser \
+#      /app/models \
+#      /app/models
 COPY --chown=appuser:appuser . .
- 
-# Set environment variables to optimize Python
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1 
- 
-# Switch to non-root user
+
+RUN chown -R appuser:appuser /app
+
+RUN chmod 755 /app && chmod 664 /app/db.sqlite3
+
+ENV PATH="/app/.venv/bin:$PATH"
+ENV SECRET_KEY="django-insecure-lrpnak(w(#@&-6myzn%+182m!xb2)5r43!n1l&hmg87!4r7p4a"
+ENV DEBUG=True
+
 USER appuser
- 
-# Expose the application port
-EXPOSE 8000 
- 
-# Start the application using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "app.wsgi:application"]
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app.wsgi:application"]
