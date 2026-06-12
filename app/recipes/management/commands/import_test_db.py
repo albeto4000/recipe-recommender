@@ -50,7 +50,7 @@ class Command(BaseCommand):
 		)
 
 		#recipe_sample = recipe_df.drop_duplicates(subset = ['AuthorId']).sample(n = 100, random_state = 641).fillna(0)
-		recipe_sample = recipe_df.nlargest(1000, 'ReviewCount').fillna(0)
+		recipe_sample = recipe_df.nlargest(20000, 'ReviewCount').fillna(0)
 		ratings_sample = ratings_df[ratings_df['RecipeId'].isin(recipe_sample['RecipeId'])]
 		#Selects at most 20 ratings for each recipe
 		ratings_sample = ratings_sample.groupby('RecipeId').apply(lambda x: x.nlargest(20, 'DateSubmitted')).reset_index().drop(columns = 'level_1')

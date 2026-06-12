@@ -47,9 +47,14 @@ def fit_tfidf(df):
     tfidf = TfidfVectorizer(stop_words='english')
     tfidf_matrix = tfidf.fit_transform(new_data['metadata_soup'])
 
+    dense_matrix = tfidf_matrix.toarray()
+    feature_names = tfidf.get_feature_names_out()
+    df = pd.DataFrame(dense_matrix, columns=feature_names)
+    df.to_csv("tfidf_matrix.csv", index=False)
+
     return tfidf, tfidf_matrix
 
-def get_recommendations(id, tfidf_matrix, df, indices, top_n=10):
+def get_recommendations(id, tfidf_matrix, indices, top_n=10):
     """
     Takes a recipe title, computes its similarity against all other recipes,
     and returns the top_n most similar recipes.
@@ -70,11 +75,7 @@ def get_recommendations(id, tfidf_matrix, df, indices, top_n=10):
     # Get the indices of the highest scores (excluding the recipe itself)
     similar_indices = sim_scores.argsort()[-(top_n+1):-1][::-1]
     #Maps the TF-IDF indices to the recipe IDs, and returns the most similar recipes
-    return df.iloc[similar_indices, 0].values
-    
-    # # Fetch the actual recipe data and scores for our recommendations
-    # recommendations = df.iloc[similar_indices].copy()
-    # recommendations['similarity_score'] = sim_scores[similar_indices]
+    return indices[indices.isin(similar_indices)].index.values
 
 
 if __name__ == "__main__":

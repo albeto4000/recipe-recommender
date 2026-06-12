@@ -37,7 +37,7 @@ def index(request):
 	#The first section recommends popular recipes, or recipes with the most ratings
 	#Reads the pop_scorer pipe from the models directory
 	ml_config = apps.get_app_config('recipes')
-	pop_pipe = ml_config.rec_models['popular']
+	pop_pipe = ml_config.get_model('popular')
 
 	#Gets the IDs of the 8 recipes with the most ratings
 	pop_rec_category = "popular recipes"
@@ -58,7 +58,7 @@ def index(request):
 
 	if request.user.is_authenticated:
 		#Lists model names, which will be displayed above the recommendation sections
-		model_names = ['slim', 'explicit_mf', 'implicit_mf']
+		model_names = ['slim', 'implicit_mf']
 	
 		#Fetches the recipes the user has rated, and the ratings they assigned
 		user_recipes = request.user.rating_set.values_list('recipe', flat = True)
@@ -79,8 +79,9 @@ def index(request):
 		query = lenskit.data.RecQuery(user_id = -1, history_items = history_items)
 
 		for model_name in model_names:
+			rec_pipe = ml_config.get_model(model_name)
 			#Gets 8 recommendations from the current model and extracts item IDs
-			recs = recommend(ml_config.rec_models[model_name], query, n = 8).to_df()['item_id'].values
+			recs = recommend(rec_pipe, query, n = 8).to_df()['item_id'].values
 			#Fetches the 8 recipes that correspond to the recommended IDs
 			pipe_rec_list = Recipe.objects.filter(id__in=recs)
 			#Creates a new recommendation section using the model name and recommended recipes
@@ -212,7 +213,7 @@ def detail(request, recipe_id):
 		review = ""
 
 	ml_config = apps.get_app_config('recipes')
-	results = similar_items.get_recommendations(recipe_id, ml_config.tfidf_matrix, ml_config.df, ml_config.recipe_indices, top_n=4)
+	results = similar_items.get_recommendations(recipe_id, ml_config.tfidf_matrix, ml_config.recipe_indices, top_n=4)
 
 	#Renders the page (with a lot of parameters)
 	return render(request, 'recipes/detail.html', {
