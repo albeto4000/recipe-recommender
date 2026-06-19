@@ -6,7 +6,8 @@ from django.contrib.auth import authenticate, login, get_user_model, logout
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import localdate
-from django.db.models import Avg
+from django.db.models import Avg, F, FloatField, ExpressionWrapper
+from django.db.models.functions import Random, Ln
 from django.conf import settings
 from django.contrib import messages
 
@@ -26,6 +27,8 @@ from operator import or_
 from .models import Recipe, Rating
 from . import similar_items as similar_items
 
+import random
+
 #This is the index, or the home page
 def index(request):
 	#I'll set up multiple rating sections on the home page. Each of these will send the user to the browse view (recipes:browse),
@@ -37,15 +40,27 @@ def index(request):
 	#The first section recommends popular recipes, or recipes with the most ratings
 	#Reads the pop_scorer pipe from the models directory
 	ml_config = apps.get_app_config('recipes')
-	pop_pipe = ml_config.get_model('popular')
+
+	pop_rec_list = (
+		Recipe.objects
+		.filter(review_count__gt=0)
+		.annotate(
+			key=ExpressionWrapper(
+				Ln(Random()) / (F("review_count") ** 3),
+				output_field=FloatField(),
+			)
+		)
+		.order_by("-key")[:8]
+	)
 
 	#Gets the IDs of the 8 recipes with the most ratings
 	pop_rec_category = "popular recipes"
 	#Gets the item IDs of the top 8 models recommended by the pop_scorer
-	#Pop_scorer does not need user_id to make recommendations
-	pop_rec_nums = recommend(pop_pipe, None, n=8).to_df()['item_id'].values
-	#Fetches the recipes corresponding to those 8 IDs
-	pop_rec_list = Recipe.objects.filter(id__in=pop_rec_nums)
+	# #Pop_scorer does not need user_id to make recommendations
+	# pop_pipe = ml_config.get_model('popular')
+	# pop_rec_nums = recommend(pop_pipe, None, n=8).to_df()['item_id'].values
+	# #Fetches the recipes corresponding to those 8 IDs
+	#pop_rec_list = Recipe.objects.filter(id__in=pop_rec_nums)
 	#Browse shows all recipes by popularity as its default, so I won't encode any arguments in the url
 	pop_rec_link = base_url
 	#Creates a dictionary to represent the pop_recs section
@@ -58,7 +73,7 @@ def index(request):
 
 	if request.user.is_authenticated:
 		#Lists model names, which will be displayed above the recommendation sections
-		model_names = ['slim', 'implicit_mf']
+		model_names = ['implicit_mf']
 	
 		#Fetches the recipes the user has rated, and the ratings they assigned
 		user_recipes = request.user.rating_set.values_list('recipe', flat = True)
@@ -86,7 +101,7 @@ def index(request):
 			pipe_rec_list = Recipe.objects.filter(id__in=recs)
 			#Creates a new recommendation section using the model name and recommended recipes
 			rec_list.append({
-				'category': model_name,
+				'category': 'recommended for you',
 				'list': pipe_rec_list,
 				'url': reverse('recipes:browse', query={'model': model_name})
 			})
@@ -106,7 +121,7 @@ def browse(request):
 
 		n = 100
 		
-		if model in ['slim', 'implicit_mf']:
+		if model in ['implicit_mf']:
 			n += 1
 
 		#Fetches the recipes the user has rated, and the ratings they assigned

@@ -3,43 +3,42 @@
 {% block title %}DSCI641 Recipe Recommender{% endblock %}
 
 {% block content %}
-<div class="d-flex">
-			<!-- Filter Sidebar -->
-			<div class="d-flex flex-column flex-shrink-0 p-3" id="filters-sidebar">
-				<h3>FILTER RECIPES</h3>
-				<form role="search" method="post" id="filter-form">
-					{% csrf_token %}
-					<div class="d-flex pt-2 pb-3 form-group filter-form-input">
-						<input id="search-input" class="form-control me-2" type="search" aria-label="Search"/>
-						<button id="search-btn" class="btn btn-outline-success"><i class="fa-solid fa-magnifying-glass"></i></button>
-					</div>
-					
-					<!--Season Dropdown-->
-					{% for filter in filters %}
-					<div class="dropdown form-group mb-2">
-						<button class="btn border border-dark border-2 dropdown-toggle py-2 px-3 filter-form-input" id="{{ filter.category }}-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-							By {{ filter.category|title }}
-						</button>
-						<ul class="dropdown-menu shadow p-2 filter-form-input" aria-labelledby="{{ filter.category }}-dropdown">
-							{% for choice_label, choice_value in filter.choices %}
-							<li>
-								<div class="form-group form-check mx-2 my-1">
-									<input class="form-check-input border border-dark border-1" type="checkbox" name="{{ filter.filters }}" value="{{ choice_value }}" id="{{ filter.category|cut:' ' }}-{{ choice_value|cut:' ' }}-check">
-									<label class="form-check-label" for="{{ filter.category|cut:' ' }}-{{ choice_value|cut:' ' }}-check">{{ choice_label|title }} Recipes</label>
-								</div>
-							</li>
-						{% endfor %}
+<div class="container-fluid">
+	<div class="row h-100">
+		<aside class="col-12 col-md-4 col-lg-3 col-xl-2 d-md-block sidebar">
+			<form role="search" method="post" id="filter-form">
+				{% csrf_token %}
+				<div class="d-flex pt-2 pb-3 form-group filter-form-input">
+					<input id="search-input" class="form-control me-2" type="search" aria-label="Search"/>
+					<button id="search-btn" class="btn btn-outline-success"><i class="fa-solid fa-magnifying-glass"></i></button>
+				</div>
+				
+				{% for filter in filters %}
+				<div class="dropdown form-group mb-2">
+					<button class="btn border border-dark border-2 dropdown-toggle py-2 px-3 filter-form-input" id="{{ filter.category }}-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+						By {{ filter.category|title }}
+					</button>
+					<ul class="dropdown-menu shadow p-2 filter-form-input" aria-labelledby="{{ filter.category }}-dropdown">
+						{% for choice_label, choice_value in filter.choices %}
+						<li>
+							<div class="form-group form-check mx-2 my-1">
+								<input class="form-check-input border border-dark border-1" type="checkbox" name="{{ filter.filters }}" value="{{ choice_value }}" id="{{ filter.category|cut:' ' }}-{{ choice_value|cut:' ' }}-check">
+								<label class="form-check-label" for="{{ filter.category|cut:' ' }}-{{ choice_value|cut:' ' }}-check">{{ choice_label|title }} Recipes</label>
+							</div>
+						</li>
+					{% endfor %}
 					</ul>
 				</div>
 				{% endfor %}
 			</form>
-		</div>
+		</aside>
 
-		<!--Page Content-->
-		<main class="flex-grow-1">
+		<main class="col-12 col-md-8 col-lg-9 col-xl-10 ms-sm-auto px-md-4 d-flex justify-content-center align-items-center">
 			{% include 'recipes/paginated-recipes.html' %}
 		</main>
 	</div>
+</div>
+{% include 'recipes/search-section.html' %}
 {% endblock %}
 
 {% block scripts %}
